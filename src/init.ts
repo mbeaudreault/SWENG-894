@@ -7,7 +7,6 @@ function fnAddButtons(doc, value, id) {
 }
 
 function fnDefineEvents(doc, chromeVar) {
-  console.log(doc.buttons);
   doc
     .getElementById("like-btn")
     .addEventListener("click", function (event) {
@@ -50,7 +49,6 @@ try{
   // @ts-ignore
   main(document, chrome);
 } catch(e) {
-  console.log(e);
 }
 
 export { fnDefineEvents, fnAddButtons };
