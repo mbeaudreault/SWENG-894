@@ -1,11 +1,15 @@
 import 'jest';
-import { fnDefineEvents, fnAddButtons } from "../../src/init";
+import { fnDefineEvents, fnAddButtons, addTextNode, getData } from "../../src/init";
+
+
+class MockText {
+  constructor(value) {
+    this.value = value;
+  }
+}
 
 
 class MockButton {
-  id: string;
-  value: string;
-  type: string;
 
   constructor(btnId, btnValue, btnType) {
     this.id = btnId;
@@ -19,8 +23,6 @@ class MockButton {
 }
 
 class MockDocument {
-  buttons: Array<MockButton>;
-  children: Array<MockElement>;
 
   constructor() {
     this.buttons = [];
@@ -32,6 +34,10 @@ class MockDocument {
       const newButton = new MockButton("this", "should", "change");
       this.addButton(newButton);
       return newButton;
+    } else if (eleName === "div") {
+      const newDiv = new MockElement("div");
+      this.children.push(newDiv);
+      return newDiv;
     }
   }
 
@@ -48,6 +54,11 @@ class MockDocument {
     this.buttons.push(button);
   }
 
+  createTextNode(value) {
+    const newText = new MockText(value);
+    return newText;
+  }
+
   querySelector(id) {
     const ele = new MockElement(id);
     this.children.push(ele);
@@ -55,13 +66,20 @@ class MockDocument {
   }
 }
 
+class MockRuntime {
+  sendMessage(msg) {
+    return 1;
+  }
+}
+
 class MockChrome {
 
+  constructor() {
+    this.runtime = new MockRuntime
+  }
 }
 
 class MockElement {
-  id: string;
-  children: Array<MockElement>;
 
   constructor(eleId) {
     this.id = eleId;
@@ -81,12 +99,26 @@ it ("defineEvents executes", () => {
   doc.addButton(mockLikeBtn);
   doc.addButton(mockDisLikeBtn);
 
-  fnDefineEvents(doc, mockChrome);
+  fnDefineEvents("like-btn", "add-numLikes", doc, mockChrome);
+  fnDefineEvents("dislike-btn", "add-numDislikes", doc, mockChrome);
 });
 
 it ("addButtons test", () => {
   const doc = new MockDocument();
-  fnAddButtons(doc, "test-name", "test-id");
+  fnAddButtons(doc, "test-name", "test-id", "div[id='top-level-buttons-computed']");
   expect(doc.children[0].children[0]).toBeDefined();
   expect(doc.children[0].children[0].id).toBe("test-id");
+})
+
+it ("addTextNode test", () => {
+  const doc = new MockDocument();
+
+  addTextNode(doc, "test1", "test_location");
+  expect(doc.children[0].children[0]).toBeDefined();
+
+})
+
+it ("getData test", () => {
+  const mockChrome = new MockChrome();
+  const data = getData(mockChrome, "get-numLikes");
 })
