@@ -2,19 +2,23 @@
   "name": "sweng-894",
   "version": "1.0.0",
   "description": "",
-  "main": "jest.config.js",
+  "type": "module",
+  "main": "index.js",
   "directories": {
-    "test": "test"
+    "test": "tests"
   },
   "scripts": {
-    "test": "jest --coverage",
-    "test:watch": "jest --watch"
+    "test": "jest"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.[t|j]sx?$": "babel-jest"
+    }
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mbeaudreault/SWENG-894.git"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
@@ -22,6 +26,8 @@
   },
   "homepage": "https://github.com/mbeaudreault/SWENG-894#readme",
   "devDependencies": {
-    "typescript": "^4.5.5"
+    "@babel/preset-env": "^7.16.11",
+    "babel-jest": "^27.4.6",
+    "jest": "^27.4.7"
   }
 }

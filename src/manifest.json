@@ -14,7 +14,7 @@
     "content_scripts" : [
         {
             "js" : [
-              "init.ts"],
+              "init.js"],
             "matches" : ["*://www.youtube.com/watch*"]
         }
     ]
