@@ -108,6 +108,8 @@ it ("addButtons test", () => {
   fnAddButtons(doc, "test-name", "test-id", "div[id='top-level-buttons-computed']");
   expect(doc.children[0].children[0]).toBeDefined();
   expect(doc.children[0].children[0].id).toBe("test-id");
+  fnAddButtons(doc, 'test_flag', 'test_flag_id', "div[id='info-contents']");
+  expect(doc.children[0].children[0].id).toBe("test-id");
 })
 
 it ("addTextNode test", () => {
@@ -115,6 +117,7 @@ it ("addTextNode test", () => {
 
   addTextNode(doc, "test1", "test_location");
   expect(doc.children[0].children[0]).toBeDefined();
+  expect(doc.children[0].children[0].value).toBe("test1");
 
 })
 
