@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1643427908208" clover="3.2.0">
-  <project timestamp="1643427908208" name="All files">
+<coverage generated="1644018064308" clover="3.2.0">
+  <project timestamp="1644018064309" name="All files">
     <metrics statements="26" coveredstatements="12" conditionals="5" coveredconditionals="0" methods="8" coveredmethods="2" elements="39" coveredelements="14" complexity="0" loc="26" ncloc="26" packages="1" files="1" classes="1"/>
     <file name="init.ts" path="C:\Users\bougi\OneDrive\Documents\Grad School\SWENG 894\src\init.ts">
       <metrics statements="26" coveredstatements="12" conditionals="5" coveredconditionals="0" methods="8" coveredmethods="2"/>
