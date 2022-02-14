@@ -40,3 +40,4 @@ def test_add_rating_info():
     database_api.api.mydb = mock_db()
     database_api.api.db_adapter.add_rating_info('test_data', 'test_type', 2, 1)
     assert mc.last_query[0] == "SELECT test_type, rating_info_id FROM rating_info WHERE video_info_id = 1 AND account_info_id = 2"
+    assert mc.last_query[1] == 'UPDATE rating_info SET test_type = test_data WHERE video_info_id = 2 AND account_info_id = 1'
