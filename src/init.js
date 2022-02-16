@@ -34,12 +34,12 @@ function getData(chromeVar, msg) {
   return new Promise((resolve, reject) => {
     chromeVar.runtime.sendMessage({msg: msg}, (response) => {
       if (response) {
-        resolve(response.data);
+        resolve(JSON.parse(response.data));
       } else {
         reject("no message response");
       }
     });
-  })
+  }, 2000);
 }
 
 function main(doc, chromeVar) {
@@ -48,26 +48,24 @@ function main(doc, chromeVar) {
   async function checkForJS_Finish () {
     if (doc.querySelector("div[id='top-level-buttons-computed']")) {
       clearInterval(jsInitChecktimer);
-      await getData(chromeVar, "add-numLikes");
-      const numLikes = await getData(chromeVar, 'get-numLikes');
-      fnAddButtons(doc, numLikes + " like", "like-btn", "div[id='top-level-buttons-computed']");
-      fnDefineEvents("like-btn", "add-numLikes", doc, chromeVar);
-      const numDislikes = await getData(chromeVar, 'get-numDislikes');
-      fnAddButtons(doc, numDislikes + " dislike", "dislike-btn", "div[id='top-level-buttons-computed']");
-      fnDefineEvents("dislike-btn", "add-numDislikes", doc, chromeVar);
-      const numMisinformation = await getData(chromeVar, 'get-numMisinformation');
-      fnAddButtons(doc, numMisinformation + " Misinformation", "Misinformation-flag-btn", "div[id='info-contents']");
-      const numDidNotWork = await getData(chromeVar, 'get-numDidNotWork');
-      fnAddButtons(doc, numDidNotWork + " Didn't Work", "Didn't-work-flag-btn", "div[id='info-contents']");
-      const numOutdated = await getData(chromeVar, 'get-numOutdated');
-      fnAddButtons(doc, numOutdated + " Outdated", "Outdated-flag-btn", "div[id='info-contents']");
-      const numOffensive = await getData(chromeVar, 'get-numOffensive');
-      fnAddButtons(doc, numOffensive + " Offensive", "Offensive-flag-btn", "div[id='info-contents']");
-      const numImmoral = await getData(chromeVar, 'get-numImmoral');
-      fnAddButtons(doc, numImmoral + " Immoral", "Immoral-flag-btn", "div[id='info-contents']");
+      //await getData(chromeVar, "add-numLikes");
+      const ratingData = await getData(chromeVar, 'get-extensionTest');
+      fnAddButtons(doc, ratingData.is_liked + " like", "like-btn", "div[id='top-level-buttons-computed']");
+      fnDefineEvents("like-btn", "add-is_liked", doc, chromeVar);
+      fnAddButtons(doc, ratingData.is_disliked + " dislike", "dislike-btn", "div[id='top-level-buttons-computed']");
+      fnDefineEvents("dislike-btn", "add-is_disliked", doc, chromeVar);
+      fnAddButtons(doc, ratingData.is_misinformation + " Misinformation", "Misinformation-flag-btn", "div[id='info-contents']");
+      fnDefineEvents("Misinformation-flag-btn", "add-is_misinformation", doc, chromeVar);
+      fnAddButtons(doc, ratingData.is_did_not_work + " Didn't Work", "Didn't-work-flag-btn", "div[id='info-contents']");
+      fnDefineEvents("Didn't-work-flag-btn", "add-is_did_not_work", doc, chromeVar);
+      fnAddButtons(doc, ratingData.is_outdated + " Outdated", "Outdated-flag-btn", "div[id='info-contents']");
+      fnDefineEvents("Outdated-flag-btn", "add-is_outdated", doc, chromeVar);
+      fnAddButtons(doc, ratingData.is_offensive + " Offensive", "Offensive-flag-btn", "div[id='info-contents']");
+      fnDefineEvents("Offensive-flag-btn", "add-is_offensive", doc, chromeVar);
+      fnAddButtons(doc, ratingData.is_immoral + " Immoral", "Immoral-flag-btn", "div[id='info-contents']");
 
-      addTextNode(doc, numLikes + " Likes ", "div[id='info-contents']");
-      addTextNode(doc, numDislikes + " Disikes", "div[id='info-contents']");
+      addTextNode(doc, ratingData.is_liked + " Likes ", "div[id='info-contents']");
+      addTextNode(doc, ratingData.is_disliked + " Disikes", "div[id='info-contents']");
     }
   }
 }

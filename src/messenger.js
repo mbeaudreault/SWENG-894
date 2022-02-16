@@ -1,11 +1,5 @@
-const ratingNumMap = new Map();
-ratingNumMap.set('numLikes', 0);
-ratingNumMap.set('numDislikes', 0);
-ratingNumMap.set('numMisinformation', 0);
-ratingNumMap.set('numDidNotWork', 0);
-ratingNumMap.set('numOutdated', 0);
-ratingNumMap.set('numOffensive', 0);
-ratingNumMap.set('numImmoral', 0);
+var XMLHttpRequest = require('xhr2');
+var oReq = new XMLHttpRequest();
 
 try{
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -14,8 +8,11 @@ try{
         addToData(request.msg.split("-", 2)[1]);
         sendResponse({ sender: "messenger.ts", data: "received"});
       } else if (request.msg.split("-", 1)[0] == "get") {
-        numData = getData(request.msg.split("-", 2)[1]);
-        sendResponse({sender: "messenger.ts", data: numData});
+        (async () => {
+          const ratingData = await getData(request.msg.split("-", 2)[1]);
+          sendResponse({sender: "messenger.ts", data: ratingData});
+        })();
+        return true;
       }
     }
   });
@@ -24,11 +21,26 @@ try{
 }
 
 function addToData(dataName) {
-  ratingNumMap.set(dataName, ratingNumMap.get(dataName) + 1);
+  oReq.open("POST", "http://localhost:5000/add-rating?rating-type=" + dataName + "&rating=1&username=extensionTest&video-url=extensionTest");
+  oReq.send();
 }
 
-function getData(dataName) {
-  return ratingNumMap.get(dataName);
+function getData(videoURL) {
+  oReq.open("GET", "http://localhost:5000/get-rating?video-url=" + videoURL);
+  return new Promise((resolve, reject) => {
+    oReq.onload = function() {
+      if (oReq.readyState === 4) {
+        if (oReq.statusText === 'OK') {
+          console.log("resolved");
+          resolve(oReq.responseText);
+        } else {
+          console.log('rejected');
+          reject(oReq.statusText);
+        }
+      }
+    }
+    oReq.send();
+  })
 }
 
 export { addToData, getData };

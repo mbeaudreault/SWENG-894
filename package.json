@@ -29,5 +29,8 @@
     "@babel/preset-env": "^7.16.11",
     "babel-jest": "^27.4.6",
     "jest": "^27.4.7"
+  },
+  "dependencies": {
+    "xhr2": "^0.2.1"
   }
 }
