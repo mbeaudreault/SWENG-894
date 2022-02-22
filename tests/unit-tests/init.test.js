@@ -123,5 +123,5 @@ it ("addTextNode test", () => {
 
 it ("getData test", () => {
   const mockChrome = new MockChrome();
-  const data = getData(mockChrome, "get-numLikes");
+  const data = getData(mockChrome, "get-test_video");
 })

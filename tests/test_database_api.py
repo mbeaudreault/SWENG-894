@@ -40,4 +40,17 @@ def test_add_rating_info():
     database_api.api.mydb = mock_db()
     database_api.api.db_adapter.add_rating_info('test_data', 'test_type', 2, 1)
     assert mc.last_query[0] == "SELECT test_type, rating_info_id FROM rating_info WHERE video_info_id = 1 AND account_info_id = 2"
-    assert mc.last_query[1] == 'UPDATE rating_info SET test_type = test_data WHERE video_info_id = 2 AND account_info_id = 1'
+    assert mc.last_query[1] == 'UPDATE rating_info SET test_type = test_data WHERE video_info_id = 1 AND account_info_id = 2'
+
+def test_get_rating_info():
+    mc = mock_cursor()
+    database_api.api.db_adapter.set_mycursor(mc)
+    database_api.api.mydb = mock_db()
+    try:
+        database_api.api.db_adapter.get_rating_info("test1")
+    except (IndexError):
+        pass
+    assert mc.last_query[0] == "SELECT COALESCE(SUM(is_liked), 0), COALESCE(SUM(is_disliked), 0), COALESCE(SUM(is_misinformation), 0), " +\
+                               "COALESCE(SUM(is_did_not_work), 0), COALESCE(SUM(is_outdated), 0), COALESCE(SUM(is_offensive), 0), " +\
+                               "COALESCE(SUM(is_immoral), 0) FROM rating_info INNER JOIN video_info " +\
+                               "on rating_info.video_info_id = video_info.video_info_id WHERE video_info.video_url = 'test1';"

@@ -1,34 +1,75 @@
-const ratingNumMap = new Map();
-ratingNumMap.set('numLikes', 0);
-ratingNumMap.set('numDislikes', 0);
-ratingNumMap.set('numMisinformation', 0);
-ratingNumMap.set('numDidNotWork', 0);
-ratingNumMap.set('numOutdated', 0);
-ratingNumMap.set('numOffensive', 0);
-ratingNumMap.set('numImmoral', 0);
+//var XMLHttpRequest = require('xhr2');
+var oReq = new XMLHttpRequest();
+var currentURL = ''
 
 try{
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request) {
-      if (request.msg.split("-", 1)[0] == "add") {
-        addToData(request.msg.split("-", 2)[1]);
-        sendResponse({ sender: "messenger.ts", data: "received"});
-      } else if (request.msg.split("-", 1)[0] == "get") {
-        numData = getData(request.msg.split("-", 2)[1]);
-        sendResponse({sender: "messenger.ts", data: numData});
-      }
+      (async () => {
+        const returnData = await handleMessage(request);
+        console.log(returnData);
+        sendResponse({ sender: "messenger.ts", data: returnData});
+      })();
+      return true;
     }
   });
 } catch(e) {
   console.log(e);
 }
 
+try {
+  chrome.tabs.onActivated.addListener( function(activeInfo){
+    chrome.tabs.get(activeInfo.tabId, function(tab){
+        y = tab.url;
+        currentURL = y.replace('https://www.youtube.com/watch?v=', '');
+    });
+  });
+} catch(e) {
+  console.log(e);
+}
+
+function handleMessage(request) {
+  const [msgType, ...rest] = request.msg.split("-");
+  const msgData = rest.join('-');
+  console.log(msgType);
+  console.log(msgData);
+  return new Promise((resolve, reject) => {
+    if (msgType == "add") {
+      addToData(msgData);
+      resolve("received");
+    } else if (msgType == "get") {
+      (async () => {
+        const ratingData = await getData(msgData);
+        resolve(ratingData);
+      })();
+      return true;
+    } else if(msgType == 'URL') {
+      resolve('{"URL":"' + currentURL + '"}');
+    } else {
+      reject("invalid message type");
+    }
+  })  
+}
+
 function addToData(dataName) {
-  ratingNumMap.set(dataName, ratingNumMap.get(dataName) + 1);
+  oReq.open("POST", "http://localhost:5000/add-rating?rating-type=" + dataName + "&rating=1&username=extensionTest&video-url=" + currentURL);
+  oReq.send();
 }
 
-function getData(dataName) {
-  return ratingNumMap.get(dataName);
+function getData(videoURL) {
+  oReq.open("GET", "http://localhost:5000/get-rating?video-url=" + videoURL);
+  return new Promise((resolve, reject) => {
+    oReq.onload = function() {
+      if (oReq.readyState === 4) {
+        if (oReq.statusText === 'OK') {
+          console.log("resolved");
+          resolve(oReq.responseText);
+        } else {
+          console.log('rejected');
+          reject(oReq.statusText);
+        }
+      }
+    }
+    oReq.send();
+  })
 }
-
-export { addToData, getData };
