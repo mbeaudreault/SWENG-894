@@ -4,6 +4,10 @@
     "manifest_version": 2,
     "description" : "Some descp here",
 
+    "permissions": [
+      "tabs"
+    ],
+
     "background" : {
       "scripts": [
         "messenger.js"

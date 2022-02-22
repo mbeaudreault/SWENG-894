@@ -34,12 +34,13 @@ function getData(chromeVar, msg) {
   return new Promise((resolve, reject) => {
     chromeVar.runtime.sendMessage({msg: msg}, (response) => {
       if (response) {
+        console.log(response.data);
         resolve(JSON.parse(response.data));
       } else {
         reject("no message response");
       }
     });
-  }, 2000);
+  }, 4000);
 }
 
 function main(doc, chromeVar) {
@@ -48,8 +49,10 @@ function main(doc, chromeVar) {
   async function checkForJS_Finish () {
     if (doc.querySelector("div[id='top-level-buttons-computed']")) {
       clearInterval(jsInitChecktimer);
-      //await getData(chromeVar, "add-numLikes");
-      const ratingData = await getData(chromeVar, 'get-extensionTest');
+      const currentURL = await getData(chromeVar, 'URL');
+      console.log(currentURL.URL);
+      const ratingData = await getData(chromeVar, 'get-' + currentURL.URL);
+      console.log(ratingData);
       fnAddButtons(doc, ratingData.is_liked + " like", "like-btn", "div[id='top-level-buttons-computed']");
       fnDefineEvents("like-btn", "add-is_liked", doc, chromeVar);
       fnAddButtons(doc, ratingData.is_disliked + " dislike", "dislike-btn", "div[id='top-level-buttons-computed']");
@@ -76,5 +79,3 @@ try{
 } catch(e) {
   console.log(e);
 }
-
-export { fnDefineEvents, fnAddButtons, addTextNode, getData };

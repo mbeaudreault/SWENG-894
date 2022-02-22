@@ -56,7 +56,9 @@ class database_adapter:
         rating_data = self.mycursor.fetchall()
         if not rating_data:
             query = "INSERT INTO rating_info (account_info_id, video_info_id, " + rating_type  + ") VALUES (" + str(account_info_id) + ", " + str(video_info_id) + ", " + str(rating) + ")"
+            print(query)
             self.mycursor.execute(query)
+            mydb.commit()
         else:
             if rating == rating_data[0][0]:
                 pass
