@@ -1,5 +1,11 @@
 import 'jest';
-import { fnDefineEvents, fnAddButtons, addTextNode, getData } from "../../src/init";
+import { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton } from "../../src/init";
+
+class mockStyle {
+  constructor() {
+    this.background = "no color";
+  }
+}
 
 
 class MockText {
@@ -11,10 +17,12 @@ class MockText {
 
 class MockButton {
 
-  constructor(btnId, btnValue, btnType) {
+  constructor(btnId, btnValue, btnType, btnColor) {
     this.id = btnId;
     this.value = btnValue;
     this.type = btnType;
+    this.style = new mockStyle();
+    this.color = btnColor
   }
 
   addEventListener(eventName, funct) {
@@ -31,13 +39,17 @@ class MockDocument {
 
   createElement(eleName) {
     if (eleName === "input") {
-      const newButton = new MockButton("this", "should", "change");
+      const newButton = new MockButton("this", "should", "change", "after");
       this.addButton(newButton);
       return newButton;
     } else if (eleName === "div") {
       const newDiv = new MockElement("div");
       this.children.push(newDiv);
       return newDiv;
+    } else if (eleName === "INPUT") {
+      const newTextEdit = new MockElement("textEdit");
+      this.children.push(newTextEdit);
+      return newTextEdit;
     }
   }
 
@@ -118,7 +130,23 @@ it ("addTextNode test", () => {
   addTextNode(doc, "test1", "test_location");
   expect(doc.children[0].children[0]).toBeDefined();
   expect(doc.children[0].children[0].value).toBe("test1");
+})
 
+it ("addTextEdit test", () => {
+  const doc = new MockDocument();
+
+  addTextEdit(doc, "test1", "test_location");
+  expect(doc.children[1].children[0]).toBeDefined();
+  expect(doc.children[1].children[0].id).toBe("test1");
+})
+
+it ('constructButton test', () => {
+  const doc = new MockDocument();
+  const mChrome = new MockChrome();
+
+  constructButton(doc, "test_rating", "test1", "testID", "test_loc", "test_msg", mChrome);
+  expect(doc.children[0]).toBeDefined();
+  expect(doc.children[0].children[0].value).toBe("test1");
 })
 
 it ("getData test", () => {
