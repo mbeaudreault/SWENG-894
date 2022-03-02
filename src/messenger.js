@@ -1,6 +1,5 @@
 //var XMLHttpRequest = require('xhr2');
-//var oReq = new XMLHttpRequest();
-
+var oReq = new XMLHttpRequest();
 
 class MessageHandler {
   constructor() {
@@ -89,4 +88,4 @@ try {
   console.log(e);
 }
 
-export { MessageHandler };
+//export { MessageHandler };

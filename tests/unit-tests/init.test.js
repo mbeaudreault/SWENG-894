@@ -173,6 +173,6 @@ it ("calculateEstimatedDislikes test", () => {
   let estDislikes = calculateEstimatedDislikes(1, 0, 1);
   expect(estDislikes).toBe("More Data Needed");
 
-  estDislikes = calculateEstimatedDislikes(100, 10, 3);
+  estDislikes = calculateEstimatedDislikes("100 likes", 10, 3);
   expect(estDislikes).toBe(30);
 })

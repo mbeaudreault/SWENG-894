@@ -72,7 +72,9 @@ function calculateEstimatedDislikes(numYTLikes, extLikes, extDislikes) {
   if (extLikes == 0) {
     return 'More Data Needed';
   } else {
-    return numYTLikes * (extDislikes/extLikes);
+    let sanitizedYTLikes = numYTLikes.replace(" likes", "");
+    sanitizedYTLikes = parseInt(sanitizedYTLikes.replace(",", ""));
+    return sanitizedYTLikes * (extDislikes/extLikes);
   }
 }
 
@@ -95,7 +97,7 @@ function main(doc, chromeVar) {
       addTextEdit(doc, "username-textedit", "div[id='info-contents']");
       addTextNode(doc, "password: ", "div[id='info-contents']");
       addTextEdit(doc, "password-textedit", "div[id='info-contents']");
-      addTextNode(doc, calculateEstimatedDislikes(getNumYTLikes(doc), ratingData.is_liked, ratingData.is_disliked) + " Likes ", "div[id='info-contents']");
+      addTextNode(doc, calculateEstimatedDislikes(getNumYTLikes(doc), ratingData.is_liked, ratingData.is_disliked) + " Estimated Dislikes ", "div[id='info-contents']");
     }
   }
 }
@@ -107,4 +109,4 @@ try{
   console.log(e);
 }
 
-export { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID, calculateEstimatedDislikes, getNumYTLikes };
+//export { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID, calculateEstimatedDislikes, getNumYTLikes };
