@@ -1,5 +1,5 @@
 import 'jest';
-import { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton } from "../../src/init";
+import { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID } from "../../src/init";
 
 class mockStyle {
   constructor() {
@@ -152,4 +152,11 @@ it ('constructButton test', () => {
 it ("getData test", () => {
   const mockChrome = new MockChrome();
   const data = getData(mockChrome, "get-test_video");
+})
+
+it ("sendValueFromID test", () => {
+  const mockChrome = new MockChrome();
+  const mockDocument = new MockDocument();
+  fnAddButtons(mockDocument, "test-name", "test-id1", "div[id='top-level-buttons-computed']");
+  sendValueFromID(mockChrome, mockDocument, "test-id1");
 })

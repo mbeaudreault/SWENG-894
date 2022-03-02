@@ -1,10 +1,11 @@
-var XMLHttpRequest = require('xhr2');
-var oReq = new XMLHttpRequest();
+//var XMLHttpRequest = require('xhr2');
+//var oReq = new XMLHttpRequest();
 
 
 class MessageHandler {
   constructor() {
     this.currentURL = "";
+    this.currentUserName = "";
   }
 
   setCurrentURL(URL) {
@@ -14,6 +15,7 @@ class MessageHandler {
   handleMessage(request, requester) {
     const [msgType, ...rest] = request.msg.split("-");
     const msgData = rest.join('-');
+    console.log(msgType);
     return new Promise((resolve, reject) => {
       if (msgType == "add") {
         this.addToData(msgData, requester);
@@ -26,6 +28,8 @@ class MessageHandler {
         return true;
       } else if(msgType == 'URL') {
         resolve('{"URL":"' + this.currentURL + '"}');
+      } else if(msgType == 'username') {
+        this.currentUserName = msgData;
       } else {
         reject("invalid message type");
       }
@@ -33,7 +37,7 @@ class MessageHandler {
   }
   
   addToData(dataName, requester) {
-    requester.open("POST", "http://localhost:5000/add-rating?rating-type=" + dataName + "&rating=1&username=extensionTest&video-url=" + this.currentURL);
+    requester.open("POST", "http://localhost:5000/add-rating?rating-type=" + dataName + "&rating=1&username=" + this.currentUserName + "&video-url=" + this.currentURL);
     requester.send();
   }
   

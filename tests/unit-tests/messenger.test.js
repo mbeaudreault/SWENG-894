@@ -35,7 +35,7 @@ it ("addToData Test", () => {
   const mockRequester = new MockRequester();
   const msgHandler = new MessageHandler();
   msgHandler.addToData("is_liked", mockRequester);
-  expect(mockRequester.lastAddress).toBe("http://localhost:5000/add-rating?rating-type=is_liked&rating=1&username=extensionTest&video-url=");
+  expect(mockRequester.lastAddress).toBe("http://localhost:5000/add-rating?rating-type=is_liked&rating=1&username=&video-url=");
 });
 
 it ("getData Test", () => {

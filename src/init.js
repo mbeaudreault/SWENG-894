@@ -1,5 +1,3 @@
-
-
 function fnAddButtons(doc, value, id, inputLocation, color) {
   var btn = doc.createElement("input");
   btn.value = value;
@@ -27,6 +25,7 @@ function fnDefineEvents(id, msg, doc, chromeVar) {
   doc
     .getElementById(id)
     .addEventListener("click", function (event) {
+      sendValueFromID(chromeVar, doc, "username-textedit");
       chromeVar.runtime.sendMessage({msg: msg}, (response) => {
         if (!response) {
           console.log("not recieved");
@@ -57,6 +56,11 @@ function constructButton(doc, ratingData, name, id, inputLocation, msg, chromeVa
   }
   fnAddButtons(doc, name, id, inputLocation, color);
   fnDefineEvents(id, msg, doc, chromeVar);
+}
+
+function sendValueFromID(chromeVar, doc, id) {
+  let elementValue = doc.getElementById(id).value;
+  chromeVar.runtime.sendMessage({msg: "username-" + elementValue});
 }
 
 function main(doc, chromeVar) {
@@ -91,4 +95,4 @@ try{
   console.log(e);
 }
 
-export { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton };
+export { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID };
