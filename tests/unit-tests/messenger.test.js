@@ -1,10 +1,58 @@
 import 'jest';
-import  { addToData, getData } from "../../src/messenger";
+import  { MessageHandler } from "../../src/messenger";
+
+
+class MockRequester {
+  constructor() {
+    this.responseText = "";
+    this.statusText = "";
+    this.lastAddress = "";
+    this.lastMsgType = "";
+  }
+
+  open (msgType, address) {
+    this.lastAddress = address;
+    this.lastMsgType = msgType;
+  }
+
+  send() {
+
+  }
+
+  onload() {
+    return true;
+  }
+}
+
+class MockRequest {
+  constructor(msg) {
+    this.msg = msg;
+  }
+}
 
 
 it ("addToData Test", () => {
-  const numLikesBefore =  getData("is_liked");
-  addToData("is_liked");
-  const numLikesAfter =  getData("is_liked");
-  //expect(numLikesBefore).toBe(numLikesAfter - 1);
+  const mockRequester = new MockRequester();
+  const msgHandler = new MessageHandler();
+  msgHandler.addToData("is_liked", mockRequester);
+  expect(mockRequester.lastAddress).toBe("http://localhost:5000/add-rating?rating-type=is_liked&rating=1&username=&video-url=");
 });
+
+it ("getData Test", () => {
+  const mockRequester = new MockRequester();
+  const msgHandler = new MessageHandler();
+  msgHandler.getData("test_url", mockRequester);
+
+  expect(mockRequester.lastAddress).toBe("http://localhost:5000/get-rating?video-url=test_url");
+})
+
+it ("handleMessage Test", () => {
+  const mockRequester = new MockRequester();
+  const msgHandler = new MessageHandler();
+
+  const mockRequest1 = new MockRequest("add-isliked");
+  msgHandler.handleMessage(mockRequest1, mockRequester);
+
+  const mockRequest2 = new MockRequest("URL");
+  msgHandler.handleMessage(mockRequest2, mockRequester);
+})
