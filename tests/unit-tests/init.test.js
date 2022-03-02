@@ -1,5 +1,5 @@
 import 'jest';
-import { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID } from "../../src/init";
+import { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID, calculateEstimatedDislikes, getNumYTLikes } from "../../src/init";
 
 class mockStyle {
   constructor() {
@@ -95,6 +95,7 @@ class MockElement {
 
   constructor(eleId) {
     this.id = eleId;
+    this.ariaLabel = 1;
     this.children = [];
   }
 
@@ -159,4 +160,19 @@ it ("sendValueFromID test", () => {
   const mockDocument = new MockDocument();
   fnAddButtons(mockDocument, "test-name", "test-id1", "div[id='top-level-buttons-computed']");
   sendValueFromID(mockChrome, mockDocument, "test-id1");
+})
+
+it ("getNumYTLikes test", () => {
+  const mockDocument = new MockDocument();
+
+  const numLikes = getNumYTLikes(mockDocument);
+  expect(numLikes).toBe(1);
+})
+
+it ("calculateEstimatedDislikes test", () => {
+  let estDislikes = calculateEstimatedDislikes(1, 0, 1);
+  expect(estDislikes).toBe("More Data Needed");
+
+  estDislikes = calculateEstimatedDislikes(100, 10, 3);
+  expect(estDislikes).toBe(30);
 })

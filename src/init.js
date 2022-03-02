@@ -63,6 +63,19 @@ function sendValueFromID(chromeVar, doc, id) {
   chromeVar.runtime.sendMessage({msg: "username-" + elementValue});
 }
 
+function getNumYTLikes(doc) {
+  const likeEl = doc.querySelector("a.yt-simple-endpoint.style-scope.ytd-toggle-button-renderer yt-formatted-string[id='text']");
+  return likeEl.ariaLabel;
+}
+
+function calculateEstimatedDislikes(numYTLikes, extLikes, extDislikes) {
+  if (extLikes == 0) {
+    return 'More Data Needed';
+  } else {
+    return numYTLikes * (extDislikes/extLikes);
+  }
+}
+
 function main(doc, chromeVar) {
   var jsInitChecktimer = setInterval(checkForJS_Finish, 111);
 
@@ -82,8 +95,7 @@ function main(doc, chromeVar) {
       addTextEdit(doc, "username-textedit", "div[id='info-contents']");
       addTextNode(doc, "password: ", "div[id='info-contents']");
       addTextEdit(doc, "password-textedit", "div[id='info-contents']");
-      addTextNode(doc, ratingData.is_liked + " Likes ", "div[id='info-contents']");
-      addTextNode(doc, ratingData.is_disliked + " Disikes", "div[id='info-contents']");
+      addTextNode(doc, calculateEstimatedDislikes(getNumYTLikes(doc), ratingData.is_liked, ratingData.is_disliked) + " Likes ", "div[id='info-contents']");
     }
   }
 }
@@ -95,4 +107,4 @@ try{
   console.log(e);
 }
 
-export { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID };
+export { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID, calculateEstimatedDislikes, getNumYTLikes };
