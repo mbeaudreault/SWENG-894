@@ -54,3 +54,18 @@ def test_get_rating_info():
                                "COALESCE(SUM(is_did_not_work), 0), COALESCE(SUM(is_outdated), 0), COALESCE(SUM(is_offensive), 0), " +\
                                "COALESCE(SUM(is_immoral), 0) FROM rating_info INNER JOIN video_info " +\
                                "on rating_info.video_info_id = video_info.video_info_id WHERE video_info.video_url = 'test1';"
+
+def test_get_user_rating_info():
+    mc = mock_cursor()
+    database_api.api.db_adapter.set_mycursor(mc)
+    database_api.api.mydb = mock_db()
+    try:
+        database_api.api.db_adapter.get_user_rating_info("testURL1", "testUsername1")
+    except (IndexError):
+        pass
+    assert mc.last_query[0] == "SELECT COALESCE(is_liked, 0), COALESCE(is_disliked, 0), COALESCE(is_misinformation, 0), " +\
+                               "COALESCE(is_did_not_work, 0), COALESCE(is_outdated, 0), COALESCE(is_offensive, 0), " +\
+                               "COALESCE(is_immoral, 0) FROM rating_info INNER JOIN video_info " +\
+                               "ON rating_info.video_info_id = video_info.video_info_id " +\
+                               "INNER JOIN account_info ON account_info.account_info_id = rating_info.account_info_id " +\
+                               "WHERE video_info.video_url = 'testURL1' AND account_info.username = 'testUsername1';"

@@ -1,5 +1,5 @@
 import 'jest';
-import { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID, calculateEstimatedDislikes, getNumYTLikes } from "../../src/init";
+import { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID, calculateEstimatedDislikes, getNumYTLikes, updateButtonText } from "../../src/init";
 
 class mockStyle {
   constructor() {
@@ -112,8 +112,8 @@ it ("defineEvents executes", () => {
   doc.addButton(mockLikeBtn);
   doc.addButton(mockDisLikeBtn);
 
-  fnDefineEvents("like-btn", "add-numLikes", doc, mockChrome);
-  fnDefineEvents("dislike-btn", "add-numDislikes", doc, mockChrome);
+  fnDefineEvents("like-btn", "add-numLikes", doc, mockChrome, "testType1", "testText1");
+  fnDefineEvents("dislike-btn", "add-numDislikes", doc, mockChrome, "testType2", "testText2");
 });
 
 it ("addButtons test", () => {
@@ -145,7 +145,7 @@ it ('constructButton test', () => {
   const doc = new MockDocument();
   const mChrome = new MockChrome();
 
-  constructButton(doc, "test_rating", "test1", "testID", "test_loc", "test_msg", mChrome);
+  constructButton(doc, "test_rating", "test1", "testID", "test_loc", "test_msg", mChrome, "testType1", "testText1");
   expect(doc.children[0]).toBeDefined();
   expect(doc.children[0].children[0].value).toBe("test1");
 })
@@ -175,4 +175,13 @@ it ("calculateEstimatedDislikes test", () => {
 
   estDislikes = calculateEstimatedDislikes("100 likes", 10, 3);
   expect(estDislikes).toBe(30);
+})
+
+it ("updateBttonText test", () => {
+  const mockChrome = new MockChrome();
+  const mockDocument = new MockDocument();
+  const mockLikeBtn = new MockButton("like-btn", "like", "value");
+  mockDocument.addButton(mockLikeBtn);
+
+  //updateButtonText(mockChrome, mockDocument, "like-btn", "is_liked", "testText");
 })

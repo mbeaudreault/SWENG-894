@@ -35,7 +35,7 @@ it ("addToData Test", () => {
   const mockRequester = new MockRequester();
   const msgHandler = new MessageHandler();
   msgHandler.addToData("is_liked", mockRequester);
-  expect(mockRequester.lastAddress).toBe("http://localhost:5000/add-rating?rating-type=is_liked&rating=1&username=&video-url=");
+  expect(mockRequester.lastAddress).toBe("http://localhost:5000/add-rating?rating-type=is_liked&rating=NaN&username=&video-url=");
 });
 
 it ("getData Test", () => {
@@ -44,6 +44,14 @@ it ("getData Test", () => {
   msgHandler.getData("test_url", mockRequester);
 
   expect(mockRequester.lastAddress).toBe("http://localhost:5000/get-rating?video-url=test_url");
+})
+
+it ("getUserData Test", () => {
+  const mockRequester = new MockRequester();
+  const msgHandler = new MessageHandler();
+  msgHandler.getUserRatingData(mockRequester);
+
+  expect(mockRequester.lastAddress).toBe("http://localhost:5000/get-rating?video-url=&username=");
 })
 
 it ("handleMessage Test", () => {

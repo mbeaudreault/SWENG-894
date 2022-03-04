@@ -21,7 +21,7 @@ function addTextEdit(doc, id, inputLocation) {
   doc.querySelector(inputLocation).appendChild(textEdit);
 }
 
-function fnDefineEvents(id, msg, doc, chromeVar) {
+function fnDefineEvents(id, msg, doc, chromeVar, dataType, buttonText) {
   doc
     .getElementById(id)
     .addEventListener("click", function (event) {
@@ -31,9 +31,16 @@ function fnDefineEvents(id, msg, doc, chromeVar) {
           console.log("not recieved");
         }else {
           console.log(response.data);
+          updateButtonText(chromeVar, doc, id, dataType, buttonText);
         }
       })
     });
+}
+
+async function updateButtonText(chromeVar, doc, id, dataType, buttonText) {
+  const currentURL = await getData(chromeVar, 'URL');
+  const ratingData = await getData(chromeVar, 'get-' + currentURL.URL);
+  doc.getElementById(id).value = ratingData[dataType] + buttonText;
 }
 
 function getData(chromeVar, msg) {
@@ -49,13 +56,13 @@ function getData(chromeVar, msg) {
   }, 4000);
 }
 
-function constructButton(doc, ratingData, name, id, inputLocation, msg, chromeVar) {
+function constructButton(doc, ratingData, name, id, inputLocation, msg, chromeVar, dataType, buttonText) {
   let color = "white";
   if (ratingData > 0){
     color = "blue";
   }
   fnAddButtons(doc, name, id, inputLocation, color);
-  fnDefineEvents(id, msg, doc, chromeVar);
+  fnDefineEvents(id, msg, doc, chromeVar, dataType, buttonText);
 }
 
 function sendValueFromID(chromeVar, doc, id) {
@@ -86,13 +93,14 @@ function main(doc, chromeVar) {
       clearInterval(jsInitChecktimer);
       const currentURL = await getData(chromeVar, 'URL');
       const ratingData = await getData(chromeVar, 'get-' + currentURL.URL);
-      constructButton(doc, ratingData.is_liked, ratingData.is_liked + " like", "like-btn", "div[id='top-level-buttons-computed']", "add-is_liked", chromeVar);
-      constructButton(doc, ratingData.is_disliked, ratingData.is_disliked + " dislike", "dislike-btn", "div[id='top-level-buttons-computed']", "add-is_disliked", chromeVar);
-      constructButton(doc, ratingData.is_misinformation, ratingData.is_misinformation + " Misinformation", "Misinformation-flag-btn", "div[id='info-contents']", "add-is_misinformation", chromeVar);
-      constructButton(doc, ratingData.is_did_not_work, ratingData.is_did_not_work + " Didn't Work", "Didn't-work-flag-btn", "div[id='info-contents']", "add-is_did_not_work", chromeVar);
-      constructButton(doc, ratingData.is_outdated, ratingData.is_outdated + " Outdated", "Outdated-flag-btn",  "div[id='info-contents']", "add-is_outdated", chromeVar);
-      constructButton(doc, ratingData.is_offensive, ratingData.is_offensive + " Offensive", "Offensive-flag-btn",  "div[id='info-contents']", "add-is_offensive", chromeVar);
-      constructButton(doc, ratingData.is_immoral, ratingData.is_immoral + " Immoral", "Immoral-flag-btn", "div[id='info-contents']", "add-immoral", chromeVar);
+      getData(chromeVar, 'getUserRating-' + currentURL.URL);
+      constructButton(doc, ratingData.is_liked, ratingData.is_liked + " like", "like-btn", "div[id='top-level-buttons-computed']", "add-is_liked", chromeVar, "is_liked", " Like");
+      constructButton(doc, ratingData.is_disliked, ratingData.is_disliked + " dislike", "dislike-btn", "div[id='top-level-buttons-computed']", "add-is_disliked", chromeVar, "is_disliked", " Dislike");
+      constructButton(doc, ratingData.is_misinformation, ratingData.is_misinformation + " Misinformation", "Misinformation-flag-btn", "div[id='info-contents']", "add-is_misinformation", chromeVar, "is_misinformation", " misinformation");
+      constructButton(doc, ratingData.is_did_not_work, ratingData.is_did_not_work + " Didn't Work", "Didn't-work-flag-btn", "div[id='info-contents']", "add-is_did_not_work", chromeVar, "is_did_not_work", " Didn't Work");
+      constructButton(doc, ratingData.is_outdated, ratingData.is_outdated + " Outdated", "Outdated-flag-btn",  "div[id='info-contents']", "add-is_outdated", chromeVar, "is_outdated", " Outdated");
+      constructButton(doc, ratingData.is_offensive, ratingData.is_offensive + " Offensive", "Offensive-flag-btn",  "div[id='info-contents']", "add-is_offensive", chromeVar, "is_offensive", " Offensive");
+      constructButton(doc, ratingData.is_immoral, ratingData.is_immoral + " Immoral", "Immoral-flag-btn", "div[id='info-contents']", "add-immoral", chromeVar, "is_immoral", " Immoral");
       addTextNode(doc, "username: ", "div[id='info-contents']");
       addTextEdit(doc, "username-textedit", "div[id='info-contents']");
       addTextNode(doc, "password: ", "div[id='info-contents']");
@@ -109,4 +117,4 @@ try{
   console.log(e);
 }
 
-//export { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID, calculateEstimatedDislikes, getNumYTLikes };
+export { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID, calculateEstimatedDislikes, getNumYTLikes, updateButtonText };
