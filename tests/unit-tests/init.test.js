@@ -1,5 +1,6 @@
 import 'jest';
-import { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID, calculateEstimatedDislikes, getNumYTLikes, updateButtonText } from "../../src/init";
+import { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID, calculateEstimatedDislikes, getNumYTLikes, updateButtonText, convertYTTimeStampToMiliSeconds, enableButtons } from "../../src/init";
+
 
 class mockStyle {
   constructor() {
@@ -22,6 +23,7 @@ class MockButton {
     this.value = btnValue;
     this.type = btnType;
     this.style = new mockStyle();
+    this.disabled = true;
     this.color = btnColor
   }
 
@@ -184,4 +186,20 @@ it ("updateBttonText test", () => {
   mockDocument.addButton(mockLikeBtn);
 
   //updateButtonText(mockChrome, mockDocument, "like-btn", "is_liked", "testText");
+})
+
+it ("convertYTTimeStampToMiliSeconds test", () => {
+  const timeLen = '3:23';
+  const newTime = convertYTTimeStampToMiliSeconds(timeLen);
+
+  expect(newTime).toBe(203000);
+})
+
+it ("enableButton test", () => {
+  const buttons = [];
+  const mockDisLikeBtn = new MockButton("dislike-btn", "dislike", "value");
+  buttons.push(mockDisLikeBtn);
+  enableButtons(buttons);
+
+  expect(buttons[0].disabled).toBe(false);
 })
