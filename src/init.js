@@ -86,7 +86,8 @@ function calculateEstimatedDislikes(numYTLikes, extLikes, extDislikes) {
     sanitizedYTLikes = parseInt(sanitizedYTLikes.replace(",", ""));
     return sanitizedYTLikes * (extDislikes/extLikes);
   }
-  
+}
+
 function enableButtons(buttons) {
   for (let i = 0; i < buttons.length; i++) {
     buttons[i].disabled = false;
@@ -145,4 +146,4 @@ try{
   console.log(e);
 }
 
-export { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID, calculateEstimatedDislikes, getNumYTLikes, updateButtonText, convertYTTimeStampToMiliSeconds, enableButtons };
+export  { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID, calculateEstimatedDislikes, getNumYTLikes, updateButtonText, convertYTTimeStampToMiliSeconds, enableButtons };
