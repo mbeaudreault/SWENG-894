@@ -1,5 +1,6 @@
 import 'jest';
-import { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID, convertYTTimeStampToMiliSeconds, enableButtons } from "../../src/init";
+import { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID, calculateEstimatedDislikes, getNumYTLikes, updateButtonText, convertYTTimeStampToMiliSeconds, enableButtons } from "../../src/init";
+
 
 class mockStyle {
   constructor() {
@@ -96,6 +97,7 @@ class MockElement {
 
   constructor(eleId) {
     this.id = eleId;
+    this.ariaLabel = 1;
     this.children = [];
   }
 
@@ -112,8 +114,8 @@ it ("defineEvents executes", () => {
   doc.addButton(mockLikeBtn);
   doc.addButton(mockDisLikeBtn);
 
-  fnDefineEvents("like-btn", "add-numLikes", doc, mockChrome);
-  fnDefineEvents("dislike-btn", "add-numDislikes", doc, mockChrome);
+  fnDefineEvents("like-btn", "add-numLikes", doc, mockChrome, "testType1", "testText1");
+  fnDefineEvents("dislike-btn", "add-numDislikes", doc, mockChrome, "testType2", "testText2");
 });
 
 it ("addButtons test", () => {
@@ -145,7 +147,7 @@ it ('constructButton test', () => {
   const doc = new MockDocument();
   const mChrome = new MockChrome();
 
-  constructButton(doc, "test_rating", "test1", "testID", "test_loc", "test_msg", mChrome);
+  constructButton(doc, "test_rating", "test1", "testID", "test_loc", "test_msg", mChrome, "testType1", "testText1");
   expect(doc.children[0]).toBeDefined();
   expect(doc.children[0].children[0].value).toBe("test1");
 })
@@ -160,6 +162,30 @@ it ("sendValueFromID test", () => {
   const mockDocument = new MockDocument();
   fnAddButtons(mockDocument, "test-name", "test-id1", "div[id='top-level-buttons-computed']");
   sendValueFromID(mockChrome, mockDocument, "test-id1");
+})
+
+it ("getNumYTLikes test", () => {
+  const mockDocument = new MockDocument();
+
+  const numLikes = getNumYTLikes(mockDocument);
+  expect(numLikes).toBe(1);
+})
+
+it ("calculateEstimatedDislikes test", () => {
+  let estDislikes = calculateEstimatedDislikes(1, 0, 1);
+  expect(estDislikes).toBe("More Data Needed");
+
+  estDislikes = calculateEstimatedDislikes("100 likes", 10, 3);
+  expect(estDislikes).toBe(30);
+})
+
+it ("updateBttonText test", () => {
+  const mockChrome = new MockChrome();
+  const mockDocument = new MockDocument();
+  const mockLikeBtn = new MockButton("like-btn", "like", "value");
+  mockDocument.addButton(mockLikeBtn);
+
+  //updateButtonText(mockChrome, mockDocument, "like-btn", "is_liked", "testText");
 })
 
 it ("convertYTTimeStampToMiliSeconds test", () => {

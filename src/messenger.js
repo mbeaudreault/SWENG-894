@@ -1,11 +1,11 @@
 //var XMLHttpRequest = require('xhr2');
 //var oReq = new XMLHttpRequest();
 
-
 class MessageHandler {
   constructor() {
     this.currentURL = "";
     this.currentUserName = "";
+    this.currentUserRatingData = {}
   }
 
   setCurrentURL(URL) {
@@ -15,7 +15,6 @@ class MessageHandler {
   handleMessage(request, requester) {
     const [msgType, ...rest] = request.msg.split("-");
     const msgData = rest.join('-');
-    console.log(msgType);
     return new Promise((resolve, reject) => {
       if (msgType == "add") {
         this.addToData(msgData, requester);
@@ -30,14 +29,25 @@ class MessageHandler {
         resolve('{"URL":"' + this.currentURL + '"}');
       } else if(msgType == 'username') {
         this.currentUserName = msgData;
-      } else {
+      } else if (msgType == 'getUserRating') {
+        (async () => {
+          const ratingData = await this.getUserRatingData(requester);
+          this.currentUserRatingData = JSON.parse(ratingData);
+          resolve(ratingData);
+        })();
+      }else {
         reject("invalid message type");
       }
     })
   }
   
   addToData(dataName, requester) {
-    requester.open("POST", "http://localhost:5000/add-rating?rating-type=" + dataName + "&rating=1&username=" + this.currentUserName + "&video-url=" + this.currentURL);
+    if (this.currentUserRatingData[dataName]) {
+      this.currentUserRatingData[dataName] -= 1;
+    } else {
+      this.currentUserRatingData[dataName] += 1;
+    }
+    requester.open("POST", "http://localhost:5000/add-rating?rating-type=" + dataName + "&rating=" + this.currentUserRatingData[dataName] + "&username=" + this.currentUserName + "&video-url=" + this.currentURL);
     requester.send();
   }
   
@@ -58,7 +68,26 @@ class MessageHandler {
       requester.send();
     })
   }
+
+  getUserRatingData(requester) {
+    requester.open("GET", "http://localhost:5000/get-rating?video-url=" + this.currentURL + "&username=" + this.currentUserName)
+    return new Promise((resolve, reject) => {
+      requester.onload = function() {
+        if (requester.readyState === 4) {
+          if (requester.statusText === 'OK') {
+            console.log("resolved");
+            resolve(requester.responseText);
+          } else {
+            console.log('rejected');
+            reject(requester.statusText);
+          }
+        }
+      }
+      requester.send();
+    })
+  }
 }
+
 
 const msgHandler = new MessageHandler();
 

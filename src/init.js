@@ -23,7 +23,7 @@ function addTextEdit(doc, id, inputLocation) {
   doc.querySelector(inputLocation).appendChild(textEdit);
 }
 
-function fnDefineEvents(id, msg, doc, chromeVar) {
+function fnDefineEvents(id, msg, doc, chromeVar, dataType, buttonText) {
   doc
     .getElementById(id)
     .addEventListener("click", function (event) {
@@ -33,9 +33,16 @@ function fnDefineEvents(id, msg, doc, chromeVar) {
           console.log("not recieved");
         }else {
           console.log(response.data);
+          updateButtonText(chromeVar, doc, id, dataType, buttonText);
         }
       })
     });
+}
+
+async function updateButtonText(chromeVar, doc, id, dataType, buttonText) {
+  const currentURL = await getData(chromeVar, 'URL');
+  const ratingData = await getData(chromeVar, 'get-' + currentURL.URL);
+  doc.getElementById(id).value = ratingData[dataType] + buttonText;
 }
 
 function getData(chromeVar, msg) {
@@ -51,19 +58,34 @@ function getData(chromeVar, msg) {
   }, 4000);
 }
 
-function constructButton(doc, ratingData, name, id, inputLocation, msg, chromeVar) {
+function constructButton(doc, ratingData, name, id, inputLocation, msg, chromeVar, dataType, buttonText) {
   let color = "white";
   if (ratingData > 0){
     color = "blue";
   }
   let btn = fnAddButtons(doc, name, id, inputLocation, color);
-  fnDefineEvents(id, msg, doc, chromeVar);
+  fnDefineEvents(id, msg, doc, chromeVar, dataType, buttonText);
   return btn;
 }
 
 function sendValueFromID(chromeVar, doc, id) {
   let elementValue = doc.getElementById(id).value;
   chromeVar.runtime.sendMessage({msg: "username-" + elementValue});
+}
+
+function getNumYTLikes(doc) {
+  const likeEl = doc.querySelector("a.yt-simple-endpoint.style-scope.ytd-toggle-button-renderer yt-formatted-string[id='text']");
+  return likeEl.ariaLabel;
+}
+
+function calculateEstimatedDislikes(numYTLikes, extLikes, extDislikes) {
+  if (extLikes == 0) {
+    return 'More Data Needed';
+  } else {
+    let sanitizedYTLikes = numYTLikes.replace(" likes", "");
+    sanitizedYTLikes = parseInt(sanitizedYTLikes.replace(",", ""));
+    return sanitizedYTLikes * (extDislikes/extLikes);
+  }
 }
 
 function enableButtons(buttons) {
@@ -97,19 +119,19 @@ function main(doc, chromeVar) {
       console.log(el.innerText);
       const waitTime = convertYTTimeStampToMiliSeconds(el.innerText);
       const buttons = [];
-      buttons.push(constructButton(doc, ratingData.is_liked, ratingData.is_liked + " like", "like-btn", "div[id='top-level-buttons-computed']", "add-is_liked", chromeVar));
-      buttons.push(constructButton(doc, ratingData.is_disliked, ratingData.is_disliked + " dislike", "dislike-btn", "div[id='top-level-buttons-computed']", "add-is_disliked", chromeVar));
-      buttons.push(constructButton(doc, ratingData.is_misinformation, ratingData.is_misinformation + " Misinformation", "Misinformation-flag-btn", "div[id='info-contents']", "add-is_misinformation", chromeVar));
-      buttons.push(constructButton(doc, ratingData.is_did_not_work, ratingData.is_did_not_work + " Didn't Work", "Didn't-work-flag-btn", "div[id='info-contents']", "add-is_did_not_work", chromeVar));
-      buttons.push(constructButton(doc, ratingData.is_outdated, ratingData.is_outdated + " Outdated", "Outdated-flag-btn",  "div[id='info-contents']", "add-is_outdated", chromeVar));
-      buttons.push(constructButton(doc, ratingData.is_offensive, ratingData.is_offensive + " Offensive", "Offensive-flag-btn",  "div[id='info-contents']", "add-is_offensive", chromeVar));
-      buttons.push(constructButton(doc, ratingData.is_immoral, ratingData.is_immoral + " Immoral", "Immoral-flag-btn", "div[id='info-contents']", "add-immoral", chromeVar));
+      buttons.push(constructButton(doc, ratingData.is_liked, ratingData.is_liked + " like", "like-btn", "div[id='top-level-buttons-computed']", "add-is_liked", chromeVar, "is_liked", " Like"));
+      buttons.push(constructButton(doc, ratingData.is_disliked, ratingData.is_disliked + " dislike", "dislike-btn", "div[id='top-level-buttons-computed']", "add-is_disliked", chromeVar, "is_disliked", " Dislike"));
+      buttons.push(constructButton(doc, ratingData.is_misinformation, ratingData.is_misinformation + " Misinformation", "Misinformation-flag-btn", "div[id='info-contents']", "add-is_misinformation", chromeVar, "is_misinformation", " misinformation"));
+      buttons.push(constructButton(doc, ratingData.is_did_not_work, ratingData.is_did_not_work + " Didn't Work", "Didn't-work-flag-btn", "div[id='info-contents']", "add-is_did_not_work", chromeVar, "is_did_not_work", " Didn't Work"));
+      buttons.push(constructButton(doc, ratingData.is_outdated, ratingData.is_outdated + " Outdated", "Outdated-flag-btn",  "div[id='info-contents']", "add-is_outdated", chromeVar, "is_outdated", " Outdated"));
+      buttons.push(constructButton(doc, ratingData.is_offensive, ratingData.is_offensive + " Offensive", "Offensive-flag-btn",  "div[id='info-contents']", "add-is_offensive", chromeVar, "is_offensive", " Offensive"));
+      buttons.push(constructButton(doc, ratingData.is_immoral, ratingData.is_immoral + " Immoral", "Immoral-flag-btn", "div[id='info-contents']", "add-immoral", chromeVar, "is_immoral", " Immoral"));
       addTextNode(doc, "username: ", "div[id='info-contents']");
       addTextEdit(doc, "username-textedit", "div[id='info-contents']");
       addTextNode(doc, "password: ", "div[id='info-contents']");
       addTextEdit(doc, "password-textedit", "div[id='info-contents']");
-      addTextNode(doc, ratingData.is_liked + " Likes ", "div[id='info-contents']");
-      addTextNode(doc, ratingData.is_disliked + " Disikes", "div[id='info-contents']");
+      addTextNode(doc, calculateEstimatedDislikes(getNumYTLikes(doc), ratingData.is_liked, ratingData.is_disliked) + " Estimated Dislikes ", "div[id='info-contents']");
+
       await new Promise(r => setTimeout(r, waitTime * 0.5)).then(() => {
         enableButtons(buttons);
       });
@@ -124,4 +146,4 @@ try{
   console.log(e);
 }
 
-export { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID, convertYTTimeStampToMiliSeconds, enableButtons };
+export  { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID, calculateEstimatedDislikes, getNumYTLikes, updateButtonText, convertYTTimeStampToMiliSeconds, enableButtons };
