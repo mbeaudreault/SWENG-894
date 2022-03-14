@@ -31,6 +31,15 @@ def get_rating():
     rating_info = db_adapter.get_rating_info(video_url)
     return rating_info
 
+@app.route('/get-user-rating', methods=['GET'])
+@cross_origin()
+def get_user_rating():
+    video_url = flask.request.args.get('video-url')
+    username = flask.request.args.get("username")
+    rating_info = db_adapter.get_user_rating_info(video_url, username)
+    return rating_info
+
+
 @app.route('/', methods=['GET'])
 @cross_origin()
 def home():
@@ -52,7 +61,9 @@ class database_adapter:
             return self.mycursor.lastrowid
 
     def add_rating_info(self, rating, rating_type, account_info_id, video_info_id):
-        self.mycursor.execute("SELECT " + rating_type + ", rating_info_id FROM rating_info WHERE video_info_id = " + str(video_info_id) + " AND account_info_id = " + str(account_info_id))
+        sql_query = "SELECT " + rating_type + ", rating_info_id FROM rating_info WHERE video_info_id = " + str(video_info_id) + " AND account_info_id = " + str(account_info_id)
+        print(sql_query)
+        self.mycursor.execute(sql_query)
         rating_data = self.mycursor.fetchall()
         if not rating_data:
             query = "INSERT INTO rating_info (account_info_id, video_info_id, " + rating_type  + ") VALUES (" + str(account_info_id) + ", " + str(video_info_id) + ", " + str(rating) + ")"
@@ -74,6 +85,25 @@ class database_adapter:
                               "COALESCE(SUM(is_outdated), 0), " +
                               "COALESCE(SUM(is_offensive), 0), " +
                               "COALESCE(SUM(is_immoral), 0) FROM rating_info INNER JOIN video_info on rating_info.video_info_id = video_info.video_info_id WHERE video_info.video_url = '" + video_url + "';")
+        rating_data = self.mycursor.fetchall()
+        mydb.commit()
+        rating_dict = {"is_liked": rating_data[0][0],
+                       "is_disliked": rating_data[0][1],
+                       "is_misinformation": rating_data[0][2],
+                       "is_did_not_work": rating_data[0][3],
+                       "is_outdated": rating_data[0][4],
+                       "is_offensive": rating_data[0][5],
+                       "is_immoral": rating_data[0][6]}
+        return rating_dict
+
+    def get_user_rating_info(self, video_url, username):
+        self.mycursor.execute("SELECT COALESCE(is_liked, 0), COALESCE(is_disliked, 0), " +
+                              "COALESCE(is_misinformation, 0), COALESCE(is_did_not_work, 0), " +
+                              "COALESCE(is_outdated, 0), COALESCE(is_offensive, 0), " +
+                              "COALESCE(is_immoral, 0) FROM rating_info INNER JOIN video_info " +
+                              "ON rating_info.video_info_id = video_info.video_info_id " +
+                              "INNER JOIN account_info ON account_info.account_info_id = rating_info.account_info_id " +
+                              "WHERE video_info.video_url = '" + video_url + "' AND account_info.username = '" + username + "';")
         rating_data = self.mycursor.fetchall()
         mydb.commit()
         rating_dict = {"is_liked": rating_data[0][0],
