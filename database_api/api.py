@@ -39,6 +39,13 @@ def get_user_rating():
     rating_info = db_adapter.get_user_rating_info(video_url, username)
     return rating_info
 
+@app.route("/get-ratio-diff-from-global", methods=['GET'])
+@cross_origin()
+def get_ratio_diff_from_global():
+    video_url = flask.request.args.get('video-url')
+    ratio_diff_from_global = db_adapter.get_analytics_distance_from_mean(video_url)
+    return ratio_diff_from_global
+
 
 @app.route('/', methods=['GET'])
 @cross_origin()
@@ -65,6 +72,7 @@ class database_adapter:
         print(sql_query)
         self.mycursor.execute(sql_query)
         rating_data = self.mycursor.fetchall()
+        print("rating = ", rating)
         if not rating_data:
             query = "INSERT INTO rating_info (account_info_id, video_info_id, " + rating_type  + ") VALUES (" + str(account_info_id) + ", " + str(video_info_id) + ", " + str(rating) + ")"
             print(query)
@@ -114,6 +122,38 @@ class database_adapter:
                        "is_offensive": rating_data[0][5],
                        "is_immoral": rating_data[0][6]}
         return rating_dict
+
+    def get_analytics_distance_from_mean(self, video_url):
+        self.mycursor.execute("SELECT SUM(is_liked)/COUNT(rating_info.video_info_id) as likeRatio, " +
+                              "SUM(is_disliked)/COUNT(rating_info.video_info_id) as dislikeRatio, " +
+                              "SUM(is_misinformation)/COUNT(rating_info.video_info_id) as misinformationRatio, " +
+                              "COALESCE(SUM(is_did_not_work)/COUNT(rating_info.video_info_id), 0) as didNotWorkRatio, " +
+                              "SUM(is_outdated)/COUNT(rating_info.video_info_id) as outdatedRatio, " +
+                              "SUM(is_offensive)/COUNT(rating_info.video_info_id) as offensiveRatio, " +
+                              "SUM(is_immoral)/COUNT(rating_info.video_info_id) as immoralRatio " +
+                              "FROM rating_info;")
+        globalRatioRatings = self.mycursor.fetchall()
+        self.mycursor.execute("SELECT COALESCE(SUM(is_liked)/COUNT(rating_info.video_info_id), 0) as likeRatio, " +
+                              "COALESCE(SUM(is_disliked)/COUNT(rating_info.video_info_id), 0) as dislikeRatio, " +
+                              "COALESCE(SUM(is_misinformation)/COUNT(rating_info.video_info_id), 0) as misinformationRatio, " +
+                              "COALESCE(SUM(is_did_not_work)/COUNT(rating_info.video_info_id), 0) as didNotWorkRatio, " +
+                              "COALESCE(SUM(is_outdated)/COUNT(rating_info.video_info_id), 0) as outdatedRatio, " +
+                              "COALESCE(SUM(is_offensive)/COUNT(rating_info.video_info_id), 0) as offensiveRatio, " +
+                              "COALESCE(SUM(is_immoral)/COUNT(rating_info.video_info_id), 0) as immoralRatio " +
+                              "FROM rating_info INNER JOIN video_info on rating_info.video_info_id = video_info.video_info_id " +
+                              "WHERE video_info.video_url = '" + video_url + "';")
+        specificRatioRatings = self.mycursor.fetchall()
+        mydb.commit()
+
+
+        ratio_diff_from_global= {"is_liked": round(specificRatioRatings[0][0] - globalRatioRatings[0][0], 2),
+                                 "is_disliked": round(specificRatioRatings[0][1] - globalRatioRatings[0][1], 2),
+                                 "is_misinformation": round(specificRatioRatings[0][2] - globalRatioRatings[0][2], 2),
+                                 "is_did_not_work": round(specificRatioRatings[0][3] - globalRatioRatings[0][3], 2),
+                                 "is_outdated": round(specificRatioRatings[0][4] - globalRatioRatings[0][4], 2),
+                                 "is_offensive": round(specificRatioRatings[0][5] - globalRatioRatings[0][5], 2),
+                                 "is_immoral": round(specificRatioRatings[0][6] - globalRatioRatings[0][6], 2)}
+        return ratio_diff_from_global
 
     def set_mycursor(self, new_cursor):
         self.mycursor = new_cursor

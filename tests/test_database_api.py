@@ -69,3 +69,23 @@ def test_get_user_rating_info():
                                "ON rating_info.video_info_id = video_info.video_info_id " +\
                                "INNER JOIN account_info ON account_info.account_info_id = rating_info.account_info_id " +\
                                "WHERE video_info.video_url = 'testURL1' AND account_info.username = 'testUsername1';"
+
+def test_get_analytics_distance_from_mean():
+    mc = mock_cursor()
+    database_api.api.db_adapter.set_mycursor(mc)
+    database_api.api.mydb = mock_db()
+    try:
+        database_api.api.db_adapter.get_analytics_distance_from_mean("testVid")
+    except (IndexError, TypeError):
+        pass
+    assert mc.last_query[1] == "SELECT COALESCE(SUM(is_liked)/COUNT(rating_info.video_info_id), 0) as likeRatio, " +\
+                               "COALESCE(SUM(is_disliked)/COUNT(rating_info.video_info_id), 0) as dislikeRatio, " +\
+                               "COALESCE(SUM(is_misinformation)/COUNT(rating_info.video_info_id), 0) as misinformationRatio, " +\
+                               "COALESCE(SUM(is_did_not_work)/COUNT(rating_info.video_info_id), 0) as didNotWorkRatio, " +\
+                               "COALESCE(SUM(is_outdated)/COUNT(rating_info.video_info_id), 0) as outdatedRatio, " +\
+                               "COALESCE(SUM(is_offensive)/COUNT(rating_info.video_info_id), 0) as offensiveRatio, " +\
+                               "COALESCE(SUM(is_immoral)/COUNT(rating_info.video_info_id), 0) as immoralRatio " +\
+                               "FROM rating_info INNER JOIN video_info on rating_info.video_info_id = video_info.video_info_id " +\
+                               "WHERE video_info.video_url = 'testVid';"
+
+# add to command prompt if import error set PYTHONPATH=%PYTHONPATH%;C:\Users\bougi\OneDrive\Documents\Grad School\SWENG 894
