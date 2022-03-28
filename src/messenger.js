@@ -5,7 +5,7 @@ class MessageHandler {
   constructor() {
     this.currentURL = "";
     this.currentUserName = "";
-    this.currentUserRatingData = {}
+    this.currentUserRatingData = {"is_liked": 0}
   }
 
   setCurrentURL(URL) {
@@ -35,7 +35,12 @@ class MessageHandler {
           this.currentUserRatingData = JSON.parse(ratingData);
           resolve(ratingData);
         })();
-      }else {
+      } else if(msgType == 'getRatioDiff') {
+        (async() => {
+          const ratioDiffData = await this.getRatioDiffFromGlobal(requester);
+          resolve(ratioDiffData);
+        })();
+      } else {
         reject("invalid message type");
       }
     })
@@ -70,7 +75,7 @@ class MessageHandler {
   }
 
   getUserRatingData(requester) {
-    requester.open("GET", "http://localhost:5000/get-rating?video-url=" + this.currentURL + "&username=" + this.currentUserName)
+    requester.open("GET", "http://localhost:5000/get-rating?video-url=" + this.currentURL + "&username=" + this.currentUserName);
     return new Promise((resolve, reject) => {
       requester.onload = function() {
         if (requester.readyState === 4) {
@@ -79,6 +84,22 @@ class MessageHandler {
             resolve(requester.responseText);
           } else {
             console.log('rejected');
+            reject(requester.statusText);
+          }
+        }
+      }
+      requester.send();
+    })
+  }
+
+  getRatioDiffFromGlobal(requester) {
+    requester.open("GET", "http://localhost:5000/get-ratio-diff-from-global?video-url=" + this.currentURL);
+    return new Promise((resolve, reject) => {
+      requester.onload = function() {
+        if(requester.readyState === 4) {
+          if (requester.statusText === 'OK') {
+            resolve(requester.responseText);
+          } else {
             reject(requester.statusText);
           }
         }

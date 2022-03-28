@@ -147,9 +147,9 @@ it ('constructButton test', () => {
   const doc = new MockDocument();
   const mChrome = new MockChrome();
 
-  constructButton(doc, "test_rating", "test1", "testID", "test_loc", "test_msg", mChrome, "testType1", "testText1");
+  constructButton(doc, "1", "test1", "testID", "test_loc", "test_msg", mChrome, "testType1", "testText1");
   expect(doc.children[0]).toBeDefined();
-  expect(doc.children[0].children[0].value).toBe("test1");
+  expect(doc.children[0].children[0].value).toBe("test1 +1");
 })
 
 it ("getData test", () => {

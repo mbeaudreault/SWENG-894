@@ -35,7 +35,7 @@ it ("addToData Test", () => {
   const mockRequester = new MockRequester();
   const msgHandler = new MessageHandler();
   msgHandler.addToData("is_liked", mockRequester);
-  expect(mockRequester.lastAddress).toBe("http://localhost:5000/add-rating?rating-type=is_liked&rating=NaN&username=&video-url=");
+  expect(mockRequester.lastAddress).toBe("http://localhost:5000/add-rating?rating-type=is_liked&rating=1&username=&video-url=");
 });
 
 it ("getData Test", () => {
@@ -52,6 +52,14 @@ it ("getUserData Test", () => {
   msgHandler.getUserRatingData(mockRequester);
 
   expect(mockRequester.lastAddress).toBe("http://localhost:5000/get-rating?video-url=&username=");
+})
+
+it ("getRatioDiffFromGlobal Test", () => {
+  const mockRequester = new MockRequester();
+  const msgHandler = new MessageHandler();
+  msgHandler.getRatioDiffFromGlobal(mockRequester);
+
+  expect(mockRequester.lastAddress).toBe("http://localhost:5000/get-ratio-diff-from-global?video-url=");
 })
 
 it ("handleMessage Test", () => {
