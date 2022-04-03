@@ -26,6 +26,7 @@ class MessageHandler {
         })();
         return true;
       } else if(msgType == 'URL') {
+        this.setCurrentURL(msgData);
         resolve('{"URL":"' + this.currentURL + '"}');
       } else if(msgType == 'username') {
         this.currentUserName = msgData;
@@ -39,6 +40,11 @@ class MessageHandler {
         (async() => {
           const ratioDiffData = await this.getRatioDiffFromGlobal(requester);
           resolve(ratioDiffData);
+        })();
+      } else if (msgType == 'getRankingData') {
+        (async () => {
+          const rankData = await this.getRankingData(requester);
+          resolve(rankData);
         })();
       } else {
         reject("invalid message type");
@@ -107,6 +113,22 @@ class MessageHandler {
       requester.send();
     })
   }
+
+  getRankingData(requester) {
+    requester.open("GET", "http://localhost:5000/get-video-ranking?video-url=" + this.currentURL);
+    return new Promise((resolve, reject) => {
+      requester.onload = function() {
+        if(requester.readyState === 4) {
+          if (requester.statusText === 'OK') {
+            resolve(requester.responseText);
+          } else {
+            reject(requester.statusText);
+          }
+        }
+      }
+      requester.send();
+    })
+  }
 }
 
 
@@ -122,18 +144,6 @@ try{
       })();
       return true;
     }
-  });
-} catch(e) {
-  console.log(e);
-}
-
-try {
-  chrome.tabs.onActivated.addListener( function(activeInfo){
-    chrome.tabs.get(activeInfo.tabId, function(tab){
-        y = tab.url;
-        let currentURL = y.replace('https://www.youtube.com/watch?v=', '');
-        msgHandler.setCurrentURL(currentURL);
-    });
   });
 } catch(e) {
   console.log(e);

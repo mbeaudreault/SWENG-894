@@ -62,6 +62,14 @@ it ("getRatioDiffFromGlobal Test", () => {
   expect(mockRequester.lastAddress).toBe("http://localhost:5000/get-ratio-diff-from-global?video-url=");
 })
 
+it ("getRankingData Test", () => {
+  const mockRequester = new MockRequester();
+  const msgHandler = new MessageHandler();
+  msgHandler.getRankingData(mockRequester);
+
+  expect(mockRequester.lastAddress).toBe("http://localhost:5000/get-video-ranking?video-url=");
+})
+
 it ("handleMessage Test", () => {
   const mockRequester = new MockRequester();
   const msgHandler = new MessageHandler();

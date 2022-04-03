@@ -46,6 +46,13 @@ def get_ratio_diff_from_global():
     ratio_diff_from_global = db_adapter.get_analytics_distance_from_mean(video_url)
     return ratio_diff_from_global
 
+@app.route("/get-video-ranking", methods=['GET'])
+@cross_origin()
+def get_video_ranking():
+    video_url = flask.request.args.get('video-url')
+    video_ranking = db_adapter.get_video_rank(video_url)
+    return video_ranking
+
 
 @app.route('/', methods=['GET'])
 @cross_origin()
@@ -69,13 +76,10 @@ class database_adapter:
 
     def add_rating_info(self, rating, rating_type, account_info_id, video_info_id):
         sql_query = "SELECT " + rating_type + ", rating_info_id FROM rating_info WHERE video_info_id = " + str(video_info_id) + " AND account_info_id = " + str(account_info_id)
-        print(sql_query)
         self.mycursor.execute(sql_query)
         rating_data = self.mycursor.fetchall()
-        print("rating = ", rating)
         if not rating_data:
             query = "INSERT INTO rating_info (account_info_id, video_info_id, " + rating_type  + ") VALUES (" + str(account_info_id) + ", " + str(video_info_id) + ", " + str(rating) + ")"
-            print(query)
             self.mycursor.execute(query)
             mydb.commit()
         else:
@@ -154,6 +158,56 @@ class database_adapter:
                                  "is_offensive": round(specificRatioRatings[0][5] - globalRatioRatings[0][5], 2),
                                  "is_immoral": round(specificRatioRatings[0][6] - globalRatioRatings[0][6], 2)}
         return ratio_diff_from_global
+
+    def get_video_rank(self, video_url):
+        self.mycursor.execute("SELECT (coalesce(SUM(is_liked)/COUNT(rating_info.video_info_id),0) - " +
+	                          "coalesce((is_disliked)/COUNT(rating_info.video_info_id),0) - " +
+                              "coalesce(SUM(is_misinformation)/COUNT(rating_info.video_info_id),0) - " +
+                              "coalesce((is_did_not_work)/COUNT(rating_info.video_info_id), 0) - " +
+                              "coalesce(SUM(is_outdated)/COUNT(rating_info.video_info_id),0) - " +
+                              "coalesce(SUM(is_offensive)/COUNT(rating_info.video_info_id),0) - " +
+                              "coalesce(SUM(is_immoral)/COUNT(rating_info.video_info_id), 0)) as overallRating " +
+                              "FROM rating_info INNER JOIN video_info on rating_info.video_info_id = video_info.video_info_id " +
+                              "GROUP BY video_info.video_info_id;")
+        video_rank_values = self.mycursor.fetchall()
+        self.mycursor.execute("SELECT (coalesce(SUM(is_liked)/COUNT(rating_info.video_info_id),0) - " +
+	                          "coalesce((is_disliked)/COUNT(rating_info.video_info_id),0) - " +
+                              "coalesce(SUM(is_misinformation)/COUNT(rating_info.video_info_id),0) - " +
+                              "coalesce((is_did_not_work)/COUNT(rating_info.video_info_id), 0) - " +
+                              "coalesce(SUM(is_outdated)/COUNT(rating_info.video_info_id),0) - " +
+                              "coalesce(SUM(is_offensive)/COUNT(rating_info.video_info_id),0) -  " +
+                              "coalesce(SUM(is_immoral)/COUNT(rating_info.video_info_id), 0)) as overallRating " +
+                              "FROM rating_info INNER JOIN video_info on rating_info.video_info_id = video_info.video_info_id " +
+                              "WHERE video_info.video_url = '" + video_url + "';")
+        specific_rank_value = self.mycursor.fetchall()
+        mydb.commit()
+
+        rankings = self.sort_video_by_rating(video_rank_values)
+
+        return {'ranking': self.get_video_ranking(rankings, specific_rank_value)}
+
+    def get_video_ranking(self, rankings, target_ranking):
+        i = 0
+        try:
+            while target_ranking[0][0] < rankings[i][0]:
+                i += 1
+            return i + 1
+        except IndexError:
+            return i + 2
+        
+
+    def sort_video_by_rating(self, video_rank_values):
+        temp = []
+        for i in range(len(video_rank_values)):
+            j = 0
+            try:
+                while video_rank_values[i] < temp[j]:
+                    j += 1
+                temp.insert(j, video_rank_values[i])
+            except IndexError:
+                temp.append(video_rank_values[i])
+        return temp
+            
 
     def set_mycursor(self, new_cursor):
         self.mycursor = new_cursor

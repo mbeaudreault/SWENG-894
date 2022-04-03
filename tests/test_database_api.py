@@ -88,4 +88,49 @@ def test_get_analytics_distance_from_mean():
                                "FROM rating_info INNER JOIN video_info on rating_info.video_info_id = video_info.video_info_id " +\
                                "WHERE video_info.video_url = 'testVid';"
 
+def test_get_video_rank():
+    mc = mock_cursor()
+    database_api.api.db_adapter.set_mycursor(mc)
+    database_api.api.mydb = mock_db()
+    try:
+        database_api.api.db_adapter.get_video_rank("testVid")
+    except (IndexError, TypeError):
+        pass
+    assert mc.last_query[1] == "SELECT (coalesce(SUM(is_liked)/COUNT(rating_info.video_info_id),0) - " +\
+	                           "coalesce((is_disliked)/COUNT(rating_info.video_info_id),0) - " +\
+                               "coalesce(SUM(is_misinformation)/COUNT(rating_info.video_info_id),0) - " +\
+                               "coalesce((is_did_not_work)/COUNT(rating_info.video_info_id), 0) - " +\
+                               "coalesce(SUM(is_outdated)/COUNT(rating_info.video_info_id),0) - " +\
+                               "coalesce(SUM(is_offensive)/COUNT(rating_info.video_info_id),0) -  " +\
+                               "coalesce(SUM(is_immoral)/COUNT(rating_info.video_info_id), 0)) as overallRating " +\
+                               "FROM rating_info INNER JOIN video_info on rating_info.video_info_id = video_info.video_info_id " +\
+                               "WHERE video_info.video_url = 'testVid';"
+
+def test_sort_video_by_rating():
+    test1 = [1, 2, 3, 4, 5]
+    results1 = database_api.api.db_adapter.sort_video_by_rating(test1)
+    assert results1 == [5, 4, 3, 2, 1]
+
+    test1 = [5, 4, 3, 2, 1]
+    results1 = database_api.api.db_adapter.sort_video_by_rating(test1)
+    assert results1 == [5, 4, 3, 2, 1]
+
+    test1 = [3, 4, 2, 5, 1]
+    results1 = database_api.api.db_adapter.sort_video_by_rating(test1)
+    assert results1 == [5, 4, 3, 2, 1]
+
+    test1 = [4, 3, 1, 6, 0]
+    results1 = database_api.api.db_adapter.sort_video_by_rating(test1)
+    assert results1 == [6, 4, 3, 1, 0]
+
+def test_get_video_ranking():
+    test1 = [[5], [4], [3], [2], [1]]
+    results1 = database_api.api.db_adapter.get_video_ranking(test1, [[6]])
+    assert results1 == 1
+
+    test1 = [[5], [4], [3], [2], [1]]
+    results1 = database_api.api.db_adapter.get_video_ranking(test1, [[4]])
+    assert results1 == 2
+
+
 # add to command prompt if import error set PYTHONPATH=%PYTHONPATH%;C:\Users\bougi\OneDrive\Documents\Grad School\SWENG 894
