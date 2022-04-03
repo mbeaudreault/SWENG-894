@@ -1,5 +1,5 @@
 import 'jest';
-import { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID, calculateEstimatedDislikes, getNumYTLikes, updateButtonText, convertYTTimeStampToMiliSeconds, enableButtons } from "../../src/init";
+import { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID, calculateEstimatedDislikes, getNumYTLikes, updateButtonText, convertYTTimeStampToMiliSeconds, enableButtons, convertYTURLtoYTUID } from "../../src/init";
 
 
 class mockStyle {
@@ -90,6 +90,12 @@ class MockChrome {
 
   constructor() {
     this.runtime = new MockRuntime
+  }
+}
+
+class MockWindow {
+  constructor() {
+    this.location = 1;
   }
 }
 
@@ -193,6 +199,13 @@ it ("convertYTTimeStampToMiliSeconds test", () => {
   const newTime = convertYTTimeStampToMiliSeconds(timeLen);
 
   expect(newTime).toBe(203000);
+})
+
+it ("convertYTURLtoYTUID test", () => {
+  const mockWindow = new MockWindow();
+  const ytUID = convertYTURLtoYTUID(mockWindow);
+
+  expect(ytUID).toBe('1')
 })
 
 it ("enableButton test", () => {

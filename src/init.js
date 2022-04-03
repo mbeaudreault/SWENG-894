@@ -120,15 +120,23 @@ function convertYTTimeStampToMiliSeconds(timeString) {
   return videoLenMS;
 }
 
-function main(doc, chromeVar) {
+function convertYTURLtoYTUID(window) {
+  let fullURL = window.location.toString()
+  let ytID = fullURL.replace('https://www.youtube.com/watch?v=', '');
+  return ytID;
+}
+
+function main(doc, chromeVar, window) {
   var jsInitChecktimer = setInterval(checkForJS_Finish, 111);
 
   async function checkForJS_Finish () {
     if (doc.querySelector("div[id='top-level-buttons-computed']")) {
       clearInterval(jsInitChecktimer);
-      const currentURL = await getData(chromeVar, 'URL');
-      const ratingData = await getData(chromeVar, 'get-' + currentURL.URL);
-      const ratioData = await getData(chromeVar, 'getRatioDiff-' + currentURL.URL);
+      const currentURL = await convertYTURLtoYTUID(window);
+      await getData(chromeVar, 'URL-' + currentURL);
+      const ratingData = await getData(chromeVar, 'get-' + currentURL);
+      const ratioData = await getData(chromeVar, 'getRatioDiff-' + currentURL);
+      const rankData = await getData(chromeVar, 'getRankingData-' + currentURL)
       var el = doc.querySelector("span[class='ytp-time-duration']");
       console.log(el.innerText);
       const waitTime = convertYTTimeStampToMiliSeconds(el.innerText);
@@ -145,7 +153,7 @@ function main(doc, chromeVar) {
       addTextNode(doc, "password: ", "div[id='info-contents']");
       addTextEdit(doc, "password-textedit", "div[id='info-contents']");
       addTextNode(doc, calculateEstimatedDislikes(getNumYTLikes(doc), ratingData.is_liked, ratingData.is_disliked) + " Estimated Dislikes ", "div[id='info-contents']");
-
+      addTextNode(doc, rankData.ranking + " Video Ranking", "div[id='info-contents']")
       await new Promise(r => setTimeout(r, waitTime * 0.5)).then(() => {
         enableButtons(buttons);
       });
@@ -153,11 +161,16 @@ function main(doc, chromeVar) {
   }
 }
 
+
 try{
-  // @ts-ignore
-  main(document, chrome);
-} catch(e) {
+  var body = document.getElementsByTagName("body")[0];
+  body.addEventListener("yt-navigate-finish", function(event) {
+    main(document, chrome, window);
+  });
+} catch (e) {
   console.log(e);
 }
 
-export  { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID, calculateEstimatedDislikes, getNumYTLikes, updateButtonText, convertYTTimeStampToMiliSeconds, enableButtons };
+// credit: https://github.com/1c7/Youtube-Auto-Subtitle-Download/blob/master/Youtube%20%E4%B8%8B%E8%BD%BD%E8%87%AA%E5%8A%A8%E5%AD%97%E5%B9%95%E7%9A%84%E5%AD%97%E8%AF%8D%E7%BA%A7%E6%96%87%E4%BB%B6/Tampermonkey.js
+
+export  { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID, calculateEstimatedDislikes, getNumYTLikes, updateButtonText, convertYTTimeStampToMiliSeconds, enableButtons, convertYTURLtoYTUID };
