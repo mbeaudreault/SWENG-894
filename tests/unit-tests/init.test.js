@@ -1,5 +1,5 @@
 import 'jest';
-import { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID, calculateEstimatedDislikes, getNumYTLikes, updateButtonText, convertYTTimeStampToMiliSeconds, enableButtons, convertYTURLtoYTUID } from "../../src/init";
+import { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID, calculateEstimatedDislikes, getNumYTLikes, updateButtonText, convertYTTimeStampToMiliSeconds, enableButtons, convertYTURLtoYTUID, constructUpdatedText, main } from "../../src/init";
 
 
 class mockStyle {
@@ -215,4 +215,16 @@ it ("enableButton test", () => {
   enableButtons(buttons);
 
   expect(buttons[0].disabled).toBe(false);
+})
+
+it ("constructUpdatedText test", () => {
+  const test1  = constructUpdatedText(1, "testStr");
+})
+
+it ("main executes test", () => {
+  const mockChrome = new MockChrome();
+  const mockDocument = new MockDocument();
+  const mockWindow = new MockWindow();
+
+  main(mockDocument, mockChrome, mockWindow);
 })
