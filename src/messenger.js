@@ -5,7 +5,13 @@ class MessageHandler {
   constructor() {
     this.currentURL = "";
     this.currentUserName = "";
-    this.currentUserRatingData = {"is_liked": 0}
+    this.currentUserRatingData = {"is_liked": 0,
+                                  "is_disliked": 0,
+                                  "is_misinformation": 0,
+                                  "is_did_not_work": 0,
+                                  "is_outdated": 0,
+                                  "is_offensive": 0,
+                                  "is_immoral": 0}
   }
 
   setCurrentURL(URL) {
@@ -17,8 +23,13 @@ class MessageHandler {
     const msgData = rest.join('-');
     return new Promise((resolve, reject) => {
       if (msgType == "add") {
-        this.addToData(msgData, requester);
-        resolve("received");
+        (async () => {
+          const ratingData = await this.getUserRatingData(requester);
+          console.log("current user rating data = " + ratingData);
+          this.currentUserRatingData = JSON.parse(ratingData);
+          await this.addToData(msgData, requester);
+          resolve("received");
+        })();
       } else if (msgType == "get") {
         (async () => {
           const ratingData = await this.getData(msgData, requester);
@@ -60,6 +71,17 @@ class MessageHandler {
     }
     requester.open("POST", "http://localhost:5000/add-rating?rating-type=" + dataName + "&rating=" + this.currentUserRatingData[dataName] + "&username=" + this.currentUserName + "&video-url=" + this.currentURL);
     requester.send();
+    return new Promise((resolve, reject) => {
+      requester.onload = function() {
+        if (requester.readyState === 4) {
+          if (requester.statusText === 'OK') {
+            resolve("resolved");
+          } else {
+            reject("rejected");
+          }
+        }
+      }
+    })
   }
   
   getData(videoURL, requester) {
@@ -81,7 +103,7 @@ class MessageHandler {
   }
 
   getUserRatingData(requester) {
-    requester.open("GET", "http://localhost:5000/get-rating?video-url=" + this.currentURL + "&username=" + this.currentUserName);
+    requester.open("GET", "http://localhost:5000/get-user-rating?video-url=" + this.currentURL + "&username=" + this.currentUserName);
     return new Promise((resolve, reject) => {
       requester.onload = function() {
         if (requester.readyState === 4) {
@@ -139,7 +161,6 @@ try{
     if (request) {
       (async () => {
         const returnData = await msgHandler.handleMessage(request, oReq);
-        console.log(returnData);
         sendResponse({ sender: "messenger.ts", data: returnData});
       })();
       return true;

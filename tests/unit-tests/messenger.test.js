@@ -51,7 +51,7 @@ it ("getUserData Test", () => {
   const msgHandler = new MessageHandler();
   msgHandler.getUserRatingData(mockRequester);
 
-  expect(mockRequester.lastAddress).toBe("http://localhost:5000/get-rating?video-url=&username=");
+  expect(mockRequester.lastAddress).toBe("http://localhost:5000/get-user-rating?video-url=&username=");
 })
 
 it ("getRatioDiffFromGlobal Test", () => {
@@ -73,9 +73,6 @@ it ("getRankingData Test", () => {
 it ("handleMessage Test", () => {
   const mockRequester = new MockRequester();
   const msgHandler = new MessageHandler();
-
-  const mockRequest1 = new MockRequest("add-isliked");
-  msgHandler.handleMessage(mockRequest1, mockRequester);
 
   const mockRequest2 = new MockRequest("URL");
   msgHandler.handleMessage(mockRequest2, mockRequester);
