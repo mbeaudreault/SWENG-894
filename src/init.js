@@ -3,6 +3,7 @@ function fnAddButtons(doc, value, id, inputLocation, color) {
   btn.value = value;
   btn.id = id;
   btn.type = "submit";
+  console.log(color);
   btn.style.background = color;
   btn.disabled = true;
   doc.querySelector(inputLocation).appendChild(btn);
@@ -40,7 +41,7 @@ function fnDefineEvents(id, msg, doc, chromeVar, dataType, buttonText, currentUR
 }
 
 async function updateButtonText(chromeVar, doc, id, dataType, buttonText, currentURL) {
-  const ratingData = await getData(chromeVar, 'get-' + currentURL);
+  const ratingData = await getData(chromeVar, currentURL + '-get' );
   doc.getElementById(id).value = ratingData[dataType] + buttonText;
 }
 
@@ -139,19 +140,19 @@ function setUpButtons(doc, ratioData, ratingData, chromeVar, currentURL) {
     (async () => {
       const buttons = [];
       const likeUpdateText = await constructUpdatedText(ratioData.is_liked, " like ");
-      buttons.push(constructButton(doc, ratioData.is_liked, ratingData.is_liked + " like", "like-btn", "div[id='top-level-buttons-computed']", "add-is_liked", chromeVar, "is_liked", likeUpdateText, currentURL));
+      buttons.push(constructButton(doc, ratioData.is_liked, ratingData.is_liked + " like", "like-btn", "div[id='top-level-buttons-computed']",  currentURL + "-add-is_liked", chromeVar, "is_liked", likeUpdateText, currentURL));
       const dislikeUpdateText = await constructUpdatedText(ratioData.is_disliked, " dislike ");
-      buttons.push(constructButton(doc, ratioData.is_disliked, ratingData.is_disliked + " dislike", "dislike-btn", "div[id='top-level-buttons-computed']", "add-is_disliked", chromeVar, "is_disliked", dislikeUpdateText, currentURL));
+      buttons.push(constructButton(doc, ratioData.is_disliked, ratingData.is_disliked + " dislike", "dislike-btn", "div[id='top-level-buttons-computed']", currentURL + "-add-is_disliked", chromeVar, "is_disliked", dislikeUpdateText, currentURL));
       const misinformationUpdateText = await constructUpdatedText(ratioData.is_misinformation, " misinformation ");
-      buttons.push(constructButton(doc, ratioData.is_misinformation, ratingData.is_misinformation + " misinformation", "Misinformation-flag-btn", "div[id='info-contents']", "add-is_misinformation", chromeVar, "is_misinformation", misinformationUpdateText, currentURL));
+      buttons.push(constructButton(doc, ratioData.is_misinformation, ratingData.is_misinformation + " misinformation", "Misinformation-flag-btn", "div[id='info-contents']", currentURL + "-add-is_misinformation", chromeVar, "is_misinformation", misinformationUpdateText, currentURL));
       const didNotWorkUpdateText = await constructUpdatedText(ratioData.is_did_not_work, " didn't work ");
-      buttons.push(constructButton(doc, ratioData.is_did_not_work, ratingData.is_did_not_work + " didn't work", "Didn't-work-flag-btn", "div[id='info-contents']", "add-is_did_not_work", chromeVar, "is_did_not_work", didNotWorkUpdateText, currentURL));
+      buttons.push(constructButton(doc, ratioData.is_did_not_work, ratingData.is_did_not_work + " didn't work", "Didn't-work-flag-btn", "div[id='info-contents']", currentURL + "-add-is_did_not_work", chromeVar, "is_did_not_work", didNotWorkUpdateText, currentURL));
       const outdatedUpdateText = await constructUpdatedText(ratioData.is_outdated, " outdated ");
-      buttons.push(constructButton(doc, ratioData.is_outdated, ratingData.is_outdated + " outdated", "Outdated-flag-btn",  "div[id='info-contents']", "add-is_outdated", chromeVar, "is_outdated", outdatedUpdateText, currentURL));
+      buttons.push(constructButton(doc, ratioData.is_outdated, ratingData.is_outdated + " outdated", "Outdated-flag-btn",  "div[id='info-contents']", "add-is_outdated", chromeVar, currentURL + "-is_outdated", outdatedUpdateText, currentURL));
       const offensiveUpdateText = await constructUpdatedText(ratioData.is_offensive, " offensive ");
-      buttons.push(constructButton(doc, ratioData.is_offensive, ratingData.is_offensive + " Offensive", "Offensive-flag-btn",  "div[id='info-contents']", "add-is_offensive", chromeVar, "is_offensive", offensiveUpdateText, currentURL));
+      buttons.push(constructButton(doc, ratioData.is_offensive, ratingData.is_offensive + " Offensive", "Offensive-flag-btn",  "div[id='info-contents']", currentURL + "-add-is_offensive", chromeVar, "is_offensive", offensiveUpdateText, currentURL));
       const immoralUpdateText = await constructUpdatedText(ratioData.is_immoral, " immoral ");
-      buttons.push(constructButton(doc, ratioData.is_immoral, ratingData.is_immoral + " immoral", "Immoral-flag-btn", "div[id='info-contents']", "add-immoral", chromeVar, "is_immoral", immoralUpdateText, currentURL));
+      buttons.push(constructButton(doc, ratioData.is_immoral, ratingData.is_immoral + " immoral", "Immoral-flag-btn", "div[id='info-contents']", currentURL + "-add-is_immoral", chromeVar, "is_immoral", immoralUpdateText, currentURL));
       resolve(buttons);
     })();
   });
@@ -164,10 +165,9 @@ function main(doc, chromeVar, window) {
     if (doc.querySelector("div[id='top-level-buttons-computed']")) {
       clearInterval(jsInitChecktimer);
       const currentURL = await convertYTURLtoYTUID(window);
-      await getData(chromeVar, 'URL-' + currentURL);
-      const ratingData = await getData(chromeVar, 'get-' + currentURL);
-      const ratioData = await getData(chromeVar, 'getRatioDiff-' + currentURL);
-      const rankData = await getData(chromeVar, 'getRankingData-' + currentURL)
+      const ratingData = await getData(chromeVar,  currentURL + '-get');
+      const ratioData = await getData(chromeVar, currentURL + '-getRatioDiff' );
+      const rankData = await getData(chromeVar, currentURL + '-getRankingData-' )
       var el = doc.querySelector("span[class='ytp-time-duration']");
       console.log(el.innerText);
       const waitTime = convertYTTimeStampToMiliSeconds(el.innerText);
@@ -197,4 +197,4 @@ try{
 
 // credit: https://github.com/1c7/Youtube-Auto-Subtitle-Download/blob/master/Youtube%20%E4%B8%8B%E8%BD%BD%E8%87%AA%E5%8A%A8%E5%AD%97%E5%B9%95%E7%9A%84%E5%AD%97%E8%AF%8D%E7%BA%A7%E6%96%87%E4%BB%B6/Tampermonkey.js
 
-export  { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID, calculateEstimatedDislikes, getNumYTLikes, updateButtonText, convertYTTimeStampToMiliSeconds, enableButtons, convertYTURLtoYTUID, constructUpdatedText, main };
+export  { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID, calculateEstimatedDislikes, getNumYTLikes, updateButtonText, convertYTTimeStampToMiliSeconds, enableButtons, convertYTURLtoYTUID, constructUpdatedText, setUpButtons, main };
