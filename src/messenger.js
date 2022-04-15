@@ -14,31 +14,24 @@ class MessageHandler {
                                   "is_immoral": 0}
   }
 
-  setCurrentURL(URL) {
-    this.currentURL = URL;
-  }
-
   handleMessage(request, requester) {
-    const [msgType, ...rest] = request.msg.split("-");
+    const [videoURL, msgType, ...rest] = request.msg.split("-");
+    console.log(videoURL + " " + msgType + " " + rest);
     const msgData = rest.join('-');
     return new Promise((resolve, reject) => {
       if (msgType == "add") {
         (async () => {
-          const ratingData = await this.getUserRatingData(requester);
-          console.log("current user rating data = " + ratingData);
+          const ratingData = await this.getUserRatingData(requester, videoURL);
           this.currentUserRatingData = JSON.parse(ratingData);
-          await this.addToData(msgData, requester);
+          await this.addToData(msgData, requester, videoURL);
           resolve("received");
         })();
       } else if (msgType == "get") {
         (async () => {
-          const ratingData = await this.getData(msgData, requester);
+          const ratingData = await this.getData(videoURL, requester);
           resolve(ratingData);
         })();
         return true;
-      } else if(msgType == 'URL') {
-        this.setCurrentURL(msgData);
-        resolve('{"URL":"' + this.currentURL + '"}');
       } else if(msgType == 'username') {
         this.currentUserName = msgData;
       } else if (msgType == 'getUserRating') {
@@ -49,27 +42,28 @@ class MessageHandler {
         })();
       } else if(msgType == 'getRatioDiff') {
         (async() => {
-          const ratioDiffData = await this.getRatioDiffFromGlobal(requester);
+          const ratioDiffData = await this.getRatioDiffFromGlobal(requester, videoURL);
           resolve(ratioDiffData);
         })();
       } else if (msgType == 'getRankingData') {
         (async () => {
-          const rankData = await this.getRankingData(requester);
+          const rankData = await this.getRankingData(requester, videoURL);
           resolve(rankData);
         })();
       } else {
+        console.log("msgType " + msgType)
         reject("invalid message type");
       }
     })
   }
   
-  addToData(dataName, requester) {
+  addToData(dataName, requester, videoURL) {
     if (this.currentUserRatingData[dataName]) {
       this.currentUserRatingData[dataName] -= 1;
     } else {
       this.currentUserRatingData[dataName] += 1;
     }
-    requester.open("POST", "http://localhost:5000/add-rating?rating-type=" + dataName + "&rating=" + this.currentUserRatingData[dataName] + "&username=" + this.currentUserName + "&video-url=" + this.currentURL);
+    requester.open("POST", "http://localhost:5000/add-rating?rating-type=" + dataName + "&rating=" + this.currentUserRatingData[dataName] + "&username=" + this.currentUserName + "&video-url=" + videoURL);
     requester.send();
     return new Promise((resolve, reject) => {
       requester.onload = function() {
@@ -102,8 +96,8 @@ class MessageHandler {
     })
   }
 
-  getUserRatingData(requester) {
-    requester.open("GET", "http://localhost:5000/get-user-rating?video-url=" + this.currentURL + "&username=" + this.currentUserName);
+  getUserRatingData(requester, videoURL) {
+    requester.open("GET", "http://localhost:5000/get-user-rating?video-url=" + videoURL + "&username=" + this.currentUserName);
     return new Promise((resolve, reject) => {
       requester.onload = function() {
         if (requester.readyState === 4) {
@@ -120,8 +114,8 @@ class MessageHandler {
     })
   }
 
-  getRatioDiffFromGlobal(requester) {
-    requester.open("GET", "http://localhost:5000/get-ratio-diff-from-global?video-url=" + this.currentURL);
+  getRatioDiffFromGlobal(requester, videoURL) {
+    requester.open("GET", "http://localhost:5000/get-ratio-diff-from-global?video-url=" + videoURL);
     return new Promise((resolve, reject) => {
       requester.onload = function() {
         if(requester.readyState === 4) {
@@ -136,8 +130,8 @@ class MessageHandler {
     })
   }
 
-  getRankingData(requester) {
-    requester.open("GET", "http://localhost:5000/get-video-ranking?video-url=" + this.currentURL);
+  getRankingData(requester, videoURL) {
+    requester.open("GET", "http://localhost:5000/get-video-ranking?video-url=" + videoURL);
     return new Promise((resolve, reject) => {
       requester.onload = function() {
         if(requester.readyState === 4) {
