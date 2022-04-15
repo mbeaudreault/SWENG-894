@@ -1,6 +1,6 @@
 import 'jest';
-import { fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID, calculateEstimatedDislikes, getNumYTLikes, updateButtonText, convertYTTimeStampToMiliSeconds, enableButtons, convertYTURLtoYTUID, constructUpdatedText, main } from "../../src/init";
-
+import { setUpButtons, fnDefineEvents, fnAddButtons, addTextNode, getData, addTextEdit, constructButton, sendValueFromID, calculateEstimatedDislikes, getNumYTLikes, updateButtonText, convertYTTimeStampToMiliSeconds, enableButtons, convertYTURLtoYTUID, constructUpdatedText, main } from "../../src/init";
+require('regenerator-runtime/runtime');
 
 class mockStyle {
   constructor() {
@@ -156,6 +156,7 @@ it ('constructButton test', () => {
   constructButton(doc, "1", "test1", "testID", "test_loc", "test_msg", mChrome, "testType1", "testText1");
   expect(doc.children[0]).toBeDefined();
   expect(doc.children[0].children[0].value).toBe("test1 +1");
+  constructButton(doc, -1, "test1", "testID", "test_loc", "test_msg", mChrome, "testType1", "testText1");
 })
 
 it ("getData test", () => {
@@ -185,13 +186,13 @@ it ("calculateEstimatedDislikes test", () => {
   expect(estDislikes).toBe(30);
 })
 
-it ("updateBttonText test", () => {
+it ("updateBttonText test", async() => {
   const mockChrome = new MockChrome();
   const mockDocument = new MockDocument();
   const mockLikeBtn = new MockButton("like-btn", "like", "value");
   mockDocument.addButton(mockLikeBtn);
 
-  //updateButtonText(mockChrome, mockDocument, "like-btn", "is_liked", "testText");
+  //await updateButtonText(mockChrome, mockDocument, "like-btn", "is_liked", "testText");
 })
 
 it ("convertYTTimeStampToMiliSeconds test", () => {
@@ -217,9 +218,25 @@ it ("enableButton test", () => {
   expect(buttons[0].disabled).toBe(false);
 })
 
-it ("constructUpdatedText test", () => {
-  const test1  = constructUpdatedText(1, "testStr");
+it ("constructUpdatedText test", async() => {
+  const test1  = await constructUpdatedText(1, "testStr");
+  expect(test1).toBe("testStr+1");
 })
+
+test ("setUPButtons Test", async() => {
+  const mockDocument = new MockDocument();
+  const mockChrome = new MockChrome();
+  const testURl = 'test1';
+  const ratioData = {"is_liked": 0,
+  "is_disliked": 0,
+  "is_misinformation": 0,
+  "is_did_not_work": 0,
+  "is_outdated": 0,
+  "is_offensive": 0,
+  "is_immoral": 0};
+  const buttons  = await setUpButtons(mockDocument, ratioData, ratioData, mockChrome, testURl);
+})
+
 
 it ("main executes test", () => {
   const mockChrome = new MockChrome();
