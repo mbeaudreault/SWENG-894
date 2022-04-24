@@ -98,6 +98,7 @@ class database_adapter:
                               "COALESCE(SUM(is_offensive), 0), " +
                               "COALESCE(SUM(is_immoral), 0) FROM rating_info INNER JOIN video_info on rating_info.video_info_id = video_info.video_info_id WHERE video_info.video_url = '" + video_url + "';")
         rating_data = self.mycursor.fetchall()
+        print(rating_data)
         mydb.commit()
         rating_dict = {"is_liked": rating_data[0][0],
                        "is_disliked": rating_data[0][1],
@@ -106,6 +107,7 @@ class database_adapter:
                        "is_outdated": rating_data[0][4],
                        "is_offensive": rating_data[0][5],
                        "is_immoral": rating_data[0][6]}
+        print(rating_dict)
         return rating_dict
 
     def get_user_rating_info(self, video_url, username):
@@ -117,14 +119,24 @@ class database_adapter:
                               "INNER JOIN account_info ON account_info.account_info_id = rating_info.account_info_id " +
                               "WHERE video_info.video_url = '" + video_url + "' AND account_info.username = '" + username + "';")
         rating_data = self.mycursor.fetchall()
+        print(rating_data)
         mydb.commit()
-        rating_dict = {"is_liked": rating_data[0][0],
-                       "is_disliked": rating_data[0][1],
-                       "is_misinformation": rating_data[0][2],
-                       "is_did_not_work": rating_data[0][3],
-                       "is_outdated": rating_data[0][4],
-                       "is_offensive": rating_data[0][5],
-                       "is_immoral": rating_data[0][6]}
+        try: 
+            rating_dict = {"is_liked": rating_data[0][0],
+                        "is_disliked": rating_data[0][1],
+                        "is_misinformation": rating_data[0][2],
+                        "is_did_not_work": rating_data[0][3],
+                        "is_outdated": rating_data[0][4],
+                        "is_offensive": rating_data[0][5],
+                        "is_immoral": rating_data[0][6]}
+        except IndexError:
+            rating_dict = {"is_liked": 0,
+                        "is_disliked": 0,
+                        "is_misinformation": 0,
+                        "is_did_not_work": 0,
+                        "is_outdated": 0,
+                        "is_offensive": 0,
+                        "is_immoral": 0}
         return rating_dict
 
     def get_analytics_distance_from_mean(self, video_url):
@@ -187,6 +199,19 @@ class database_adapter:
         return {'ranking': self.get_video_ranking(rankings, specific_rank_value)}
 
     def get_video_ranking(self, rankings, target_ranking):
+        print(target_ranking[0], rankings)
+        if target_ranking[0] not in rankings:
+            return self.get_video_ranking_outside(rankings, target_ranking)
+        while len(rankings) >= 1:
+            if rankings[len(rankings) // 2][0] > target_ranking[0][0]:
+                return self.get_video_ranking(rankings[len(rankings) // 2:], target_ranking)
+            elif rankings[len(rankings) // 2][0] < target_ranking[0][0]:
+                return self.get_video_ranking(rankings[:len(rankings) // 2], target_ranking)
+            elif rankings[len(rankings) // 2][0] == target_ranking[0][0]:
+                return (len(rankings) // 2) + 1
+        return -1
+
+    def get_video_ranking_outside(self, rankings, target_ranking):
         i = 0
         try:
             while target_ranking[0][0] < rankings[i][0]:
@@ -194,7 +219,6 @@ class database_adapter:
             return i + 1
         except IndexError:
             return i + 2
-        
 
     def sort_video_by_rating(self, video_rank_values):
         temp = []
